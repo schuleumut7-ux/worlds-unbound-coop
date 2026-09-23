@@ -3,3 +3,13 @@
 .settings h3{margin-top:0}.settings p{color:#9eaea5;font-size:13px;line-height:1.4}.settingRow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid #ffffff12}.settingRow input{width:24px;height:24px;accent-color:#d9f26b}.settings button{width:100%;margin-top:12px}.settingsBtn{padding:8px 11px;border-radius:12px;margin-left:0}
 #mobileControls{display:none}.mobileEnabled #mobileControls{display:block}.mobileEnabled .mobileJoy{display:block}.mobileEnabled .bottom{display:none}.mobileAttack{position:absolute;right:22px;bottom:22px;display:flex;gap:12px;align-items:flex-end}.mobileAttack button{width:68px;height:68px;border-radius:50%;font-size:25px;padding:0}.mobileAttack button:first-child{background:#ffce70}.mobileAttack button:last-child{background:#9de7ff}
 @media(max-width:700px){.mobileAttack{right:18px;bottom:20px}.mobileAttack button{width:62px;height:62px}.mobileJoy{display:none!important}.mobileEnabled .mobileJoy{display:block!important}.mobileEnabled .bottom{display:none!important}}
+
+
+/* V1.11.1 mobile UI reliability fix */
+.top{z-index:30}.settingsBtn{position:relative;z-index:40}.settings{z-index:60}
+#mobileControls{position:fixed;inset:0;z-index:50;pointer-events:none}
+#mobileControls .mobileJoy,#mobileControls .mobileAttack{pointer-events:auto}
+.mobileEnabled #mobileControls{display:block!important}
+.mobileEnabled #mobileControls .mobileJoy{display:block!important;position:fixed;left:24px;bottom:30px}
+.mobileEnabled #mobileControls .mobileAttack{display:flex!important;position:fixed;right:22px;bottom:22px}
+@media(max-width:700px){.mobileEnabled #mobileControls .mobileJoy{display:block!important;left:22px;bottom:24px;width:130px;height:130px}.mobileEnabled #mobileControls .mobileAttack{display:flex!important;right:18px;bottom:22px}.mobileEnabled #mobileControls .mobileAttack button{width:68px;height:68px}}
