@@ -1,7 +1,7 @@
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d');
 let W=innerWidth,H=innerHeight,DPR=Math.min(devicePixelRatio,2);function resize(){W=innerWidth;H=innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',resize);resize();
 const keys=new Set();addEventListener('keydown',e=>{keys.add(e.key.toLowerCase());if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase()))e.preventDefault();if(e.key===' '||e.key.toLowerCase()==='o')attack();if(e.key.toLowerCase()==='e')interact();if(e.key.toLowerCase()==='p')carryAction();if(e.key.toLowerCase()==='m')medicAction()});addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));addEventListener('blur',()=>keys.clear());
-let mode='menu',mobileEnabled=localStorage.getItem('wu-mobile-controls')==='1',ws=null,room='',me='local',world=1,last=performance.now(),cam={x:1400,y:900},shake=0,flash=0,hero={x:1400,y:900,hp:100,maxHp:100,stamina:100,coins:50,level:1,xp:0,damage:14,defense:0,speed:210,downed:false,downedTimer:0,carrying:null,carriedBy:null,carrySpeedPenalty:false,medicTarget:null,medicUntil:0,medicStartDistance:0,wood:0,crystal:0,stone:0,iron:0,gems:0,potions:0,medkits:1},others=new Map(),bossHp=0,bossMax=1000,particles=[],mobs=[],resources=[],trees=[],worldSize={w:2800,h:1800},lastNet=0,attackCd=0,abilityCd=0,invOpen=false;
+let mode='menu',mobileEnabled=localStorage.getItem('wu-mobile-controls')==='1',ws=null,room='',me='local',world=1,last=performance.now(),cam={x:600,y:600},shake=0,flash=0,hero={x:600,y:600,hp:100,maxHp:100,stamina:100,coins:50,level:1,xp:0,damage:14,defense:0,speed:210,downed:false,downedTimer:0,carrying:null,carriedBy:null,carrySpeedPenalty:false,medicTarget:null,medicUntil:0,medicStartDistance:0,wood:0,crystal:0,stone:0,iron:0,gems:0,potions:0,medkits:1},others=new Map(),bossHp=0,bossMax=1000,particles=[],mobs=[],resources=[],trees=[],worldSize={w:2800,h:1800},lastNet=0,attackCd=0,abilityCd=0,invOpen=false;
 const worldData=[
 {name:'THE GREEN WILDS',bg:'#173d29',water:'#286d71',accent:'#4e9b56',boss:'ANCIENT BEAST',story:'The forest is alive. An ancient artifact calls from beyond the river. Find it before the corruption reaches the village.'},
 {name:'THE CRYSTAL CAVES',bg:'#251d42',water:'#3d6d93',accent:'#8d6cff',boss:'CRYSTAL GUARDIAN',story:'The crystals remember a world that existed before yours. Something is waking below the tunnels.'},
@@ -17,7 +17,7 @@ const zoneNames=['Whispering Forest','Silver River','Old Ruins','Ancient Grove',
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>$('toast').classList.remove('show'),1700)}
 function story(t){$('storyText').textContent=t;$('story').classList.remove('hidden')}
 $('storyClose').onclick=()=>$('story').classList.add('hidden');
-function applyMobileControls(){document.body.classList.toggle('mobileEnabled',mobileEnabled);$('mobileToggle').checked=mobileEnabled}function toggleSettings(){ $('settingsPanel').classList.toggle('hidden'); if(!$('settingsPanel').classList.contains('hidden')) applyMobileControls()}function start(){mode='game';applyMobileControls();$('menu').classList.add('hidden');$('join').classList.add('hidden');$('hud').classList.remove('hidden');generateWorld();updateUI();if(world===1&&hero.x<100)hero.x=1400; if(world===1)story(worldData[0].story);toast('V1.14 — '+worldData[world-1].name)}
+function applyMobileControls(){document.body.classList.toggle('mobileEnabled',mobileEnabled);$('mobileToggle').checked=mobileEnabled}function toggleSettings(){ $('settingsPanel').classList.toggle('hidden'); if(!$('settingsPanel').classList.contains('hidden')) applyMobileControls()}function start(){mode='game';applyMobileControls();$('menu').classList.add('hidden');$('join').classList.add('hidden');$('hud').classList.remove('hidden');generateWorld();updateUI();if(hero.x<100||hero.y<100){hero.x=600;hero.y=600;cam.x=hero.x;cam.y=hero.y;} if(world===1)story(worldData[0].story);toast('V1.14 — '+worldData[world-1].name)}
 function connect(kind,code){const proto=location.protocol==='https:'?'wss':'ws';ws=new WebSocket(proto+'://'+location.host);ws.onopen=()=>ws.send(JSON.stringify(kind==='create'?{type:'create',name:$('name').value}:{type:'join',name:$('name').value,code}));ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}if(m.type==='roomCreated'||m.type==='joined'){room=m.code;me=m.id;start();toast('ROOM '+room+' CONNECTED')}if(m.type==='error')toast(m.message);if(m.type==='state'){room=m.code||room;if(m.world&&m.world!==world){world=m.world;generateWorld();story(worldData[world-1].story)}bossHp=Number(m.bossHp??bossHp);others.clear();for(const p of m.players){if(p.id===me)Object.assign(hero,p);else others.set(p.id,p)}updateUI()}if(m.type==='worldEvent'){
   if(m.event==='carried'){const t=others.get(m.targetId);if(t){t.carriedBy=m.carrierId;t.x=m.x;t.y=m.y}}
   if(m.event==='released'){const t=others.get(m.targetId);if(t)t.carriedBy=null}
@@ -66,7 +66,25 @@ $('buyPotion').onclick=()=>buy(20,'potions');$('buyMed').onclick=()=>buy(35,'med
 function buy(cost,item){if(hero.coins<cost)return toast('Not enough Coins');hero.coins-=cost;hero[item]++;toast('Purchased!');save()}
 function renderInventory(){const vals=[['🪵 Wood',hero.wood],['🪨 Stone',hero.stone],['💎 Crystal',hero.crystal],['⛓ Iron',hero.iron],['◆ Gems',hero.gems],['🧪 Potions',hero.potions],['🩹 Med Kits',hero.medkits],['⚔ Damage',hero.damage]];$('invItems').innerHTML=vals.map(v=>'<div class="invItem"><span>'+v[0]+'</span><b>'+v[1]+'</b></div>').join('')}
 function updateUI(){$('hp').textContent=Math.ceil(hero.hp);$('maxhp').textContent=hero.maxHp;$('stamina').textContent=Math.round(hero.stamina);$('level').textContent=hero.level;$('coins').textContent=hero.coins;$('wood').textContent=hero.wood;$('crystal').textContent=hero.crystal;$('roomLabel').textContent=room?'ROOM '+room:'LOCAL';$('quest').textContent=world===1?'Find the Ancient Artifact':worldData[world-1].boss+' awaits';if(bossHp>0){$('boss').classList.remove('hidden');$('bossName').textContent=worldData[world-1].boss;$('bossBar').style.width=Math.max(0,bossHp/bossMax*100)+'%'}else $('boss').classList.add('hidden')}
-function generateWorld(){worldSize={w:2800,h:1800};trees=[];mobs=[];resources=[];for(let i=0;i<130;i++)trees.push({x:50+Math.random()*2700,y:50+Math.random()*1700,r:16+Math.random()*18});for(let i=0;i<35;i++)mobs.push({x:100+Math.random()*2600,y:100+Math.random()*1600,hp:world===1?75+Math.random()*45:120+world*18,max:0,a:Math.random()*6.28,speed:20+world*3,hit:0});mobs.forEach(m=>m.max=m.hp);for(let i=0;i<65;i++){const type=resourceTypes[Math.floor(Math.random()*resourceTypes.length)][0],info=resourceTypes.find(x=>x[0]===type);resources.push({x:80+Math.random()*2640,y:80+Math.random()*1640,type,color:info[2],taken:false})}bossHp=world===1?1000:0;cam.x=hero.x;cam.y=hero.y;updateUI()}
+function generateWorld(){
+  worldSize={w:4200,h:2800};
+  const spawn={x:600,y:600},safeRadius=700;
+  hero.x=spawn.x;hero.y=spawn.y;cam.x=spawn.x;cam.y=spawn.y;
+  trees=[];mobs=[];resources=[];
+  for(let i=0;i<220;i++)trees.push({x:50+Math.random()*(worldSize.w-100),y:50+Math.random()*(worldSize.h-100),r:16+Math.random()*18});
+  for(let i=0;i<65;i++){
+    let x,y;
+    do{x=120+Math.random()*(worldSize.w-240);y=120+Math.random()*(worldSize.h-240)}while(Math.hypot(x-spawn.x,y-spawn.y)<safeRadius);
+    mobs.push({x,y,hp:world===1?75+Math.random()*45:120+world*18,max:0,a:Math.random()*6.28,speed:20+world*3,hit:0});
+  }
+  mobs.forEach(m=>m.max=m.hp);
+  for(let i=0;i<110;i++){
+    const type=resourceTypes[Math.floor(Math.random()*resourceTypes.length)][0],info=resourceTypes.find(x=>x[0]===type);
+    let x,y;do{x=80+Math.random()*(worldSize.w-160);y=80+Math.random()*(worldSize.h-160)}while(Math.hypot(x-spawn.x,y-spawn.y)<250);
+    resources.push({x,y,type,color:info[2],taken:false});
+  }
+  bossHp=world===1?1000:0;updateUI();
+}
 let joy={on:false,x:0,y:0,pointerId:null,cx:0,cy:0},mobileKeys=new Set();
 const joyEl=$('mobileJoy'),joyKnob=$('joyKnob');
 function joyResetVisual(){joyKnob.style.transform='translate(-50%,-50%)'}
@@ -112,7 +130,7 @@ function update(dt){if(mode!=='game')return;attackCd=Math.max(0,attackCd-dt);abi
   if(mobileEnabled&&joy.on){dx=joy.x;dy=joy.y}
   const l=Math.hypot(dx,dy)||1;
   if(dx||dy){hero.x=Math.max(40,Math.min(worldSize.w-40,hero.x+dx/l*hero.speed*.22*dt));hero.y=Math.max(40,Math.min(worldSize.h-40,hero.y+dy/l*hero.speed*.22*dt));}
-  if(hero.downedTimer<=0){hero.downed=false;hero.hp=Math.ceil(hero.maxHp*.5);hero.x=1400;hero.y=900;toast('Checkpoint erreicht')}
+  if(hero.downedTimer<=0){hero.downed=false;hero.hp=Math.ceil(hero.maxHp*.5);hero.x=600;hero.y=600;cam.x=hero.x;cam.y=hero.y;toast('Checkpoint erreicht')} cam.x+=(hero.x-cam.x)*Math.min(1,dt*7);cam.y+=(hero.y-cam.y)*Math.min(1,dt*7);
   if(ws&&performance.now()-lastNet>100){lastNet=performance.now();send('input',{x:hero.x,y:hero.y,hp:hero.hp,downed:true,coins:hero.coins,level:hero.level,carrying:null})}
   updateDownedPanel();updateUI();return}
 let dx=(keys.has('d')||keys.has('arrowright')||mobileKeys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')||mobileKeys.has('arrowleft')?1:0),dy=(keys.has('s')||keys.has('arrowdown')||mobileKeys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')||mobileKeys.has('arrowup')?1:0);if(mobileEnabled&&joy.on){dx=joy.x;dy=joy.y}const l=Math.hypot(dx,dy)||1;if(dx||dy){const moveSpeed=hero.speed*(hero.carrying?0.9:1);hero.x=Math.max(40,Math.min(worldSize.w-40,hero.x+dx/l*moveSpeed*dt));hero.y=Math.max(40,Math.min(worldSize.h-40,hero.y+dy/l*moveSpeed*dt));hero.stamina=Math.max(0,hero.stamina-dt*4)}else hero.stamina=Math.min(100,hero.stamina+dt*10);
