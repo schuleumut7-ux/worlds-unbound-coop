@@ -17,7 +17,7 @@ const zoneNames=['Whispering Forest','Silver River','Old Ruins','Ancient Grove',
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>$('toast').classList.remove('show'),1700)}
 function story(t){$('storyText').textContent=t;$('story').classList.remove('hidden')}
 $('storyClose').onclick=()=>$('story').classList.add('hidden');
-function applyMobileControls(){document.body.classList.toggle('mobileEnabled',mobileEnabled);$('mobileToggle').checked=mobileEnabled}function toggleSettings(){ $('settingsPanel').classList.toggle('hidden'); if(!$('settingsPanel').classList.contains('hidden')) applyMobileControls()}function start(){mode='game';applyMobileControls();$('menu').classList.add('hidden');$('join').classList.add('hidden');$('hud').classList.remove('hidden');generateWorld();updateUI();if(world===1&&hero.x<100)hero.x=1400; if(world===1)story(worldData[0].story);toast('V1.1.1 BETA — '+worldData[world-1].name)}
+function applyMobileControls(){document.body.classList.toggle('mobileEnabled',mobileEnabled);$('mobileToggle').checked=mobileEnabled}function toggleSettings(){ $('settingsPanel').classList.toggle('hidden'); if(!$('settingsPanel').classList.contains('hidden')) applyMobileControls()}function start(){mode='game';applyMobileControls();$('menu').classList.add('hidden');$('join').classList.add('hidden');$('hud').classList.remove('hidden');generateWorld();updateUI();if(world===1&&hero.x<100)hero.x=1400; if(world===1)story(worldData[0].story);toast('V1.13 BETA — '+worldData[world-1].name)}
 function connect(kind,code){const proto=location.protocol==='https:'?'wss':'ws';ws=new WebSocket(proto+'://'+location.host);ws.onopen=()=>ws.send(JSON.stringify(kind==='create'?{type:'create',name:$('name').value}:{type:'join',name:$('name').value,code}));ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}if(m.type==='roomCreated'||m.type==='joined'){room=m.code;me=m.id;start();toast('ROOM '+room+' CONNECTED')}if(m.type==='error')toast(m.message);if(m.type==='state'){room=m.code||room;if(m.world&&m.world!==world){world=m.world;generateWorld();story(worldData[world-1].story)}bossHp=Number(m.bossHp??bossHp);others.clear();for(const p of m.players){if(p.id===me)Object.assign(hero,p);else others.set(p.id,p)}updateUI()}if(m.type==='worldEvent'){
   if(m.event==='carried'){const t=others.get(m.targetId);if(t){t.carriedBy=m.carrierId;t.x=m.x;t.y=m.y}}
   if(m.event==='released'){const t=others.get(m.targetId);if(t)t.carriedBy=null}
@@ -67,11 +67,44 @@ function buy(cost,item){if(hero.coins<cost)return toast('Not enough Coins');hero
 function renderInventory(){const vals=[['🪵 Wood',hero.wood],['🪨 Stone',hero.stone],['💎 Crystal',hero.crystal],['⛓ Iron',hero.iron],['◆ Gems',hero.gems],['🧪 Potions',hero.potions],['🩹 Med Kits',hero.medkits],['⚔ Damage',hero.damage]];$('invItems').innerHTML=vals.map(v=>'<div class="invItem"><span>'+v[0]+'</span><b>'+v[1]+'</b></div>').join('')}
 function updateUI(){$('hp').textContent=Math.ceil(hero.hp);$('maxhp').textContent=hero.maxHp;$('stamina').textContent=Math.round(hero.stamina);$('level').textContent=hero.level;$('coins').textContent=hero.coins;$('wood').textContent=hero.wood;$('crystal').textContent=hero.crystal;$('roomLabel').textContent=room?'ROOM '+room:'LOCAL';$('quest').textContent=world===1?'Find the Ancient Artifact':worldData[world-1].boss+' awaits';if(bossHp>0){$('boss').classList.remove('hidden');$('bossName').textContent=worldData[world-1].boss;$('bossBar').style.width=Math.max(0,bossHp/bossMax*100)+'%'}else $('boss').classList.add('hidden')}
 function generateWorld(){worldSize={w:2800,h:1800};trees=[];mobs=[];resources=[];for(let i=0;i<130;i++)trees.push({x:50+Math.random()*2700,y:50+Math.random()*1700,r:16+Math.random()*18});for(let i=0;i<35;i++)mobs.push({x:100+Math.random()*2600,y:100+Math.random()*1600,hp:world===1?75+Math.random()*45:120+world*18,max:0,a:Math.random()*6.28,speed:20+world*3,hit:0});mobs.forEach(m=>m.max=m.hp);for(let i=0;i<65;i++){const type=resourceTypes[Math.floor(Math.random()*resourceTypes.length)][0],info=resourceTypes.find(x=>x[0]===type);resources.push({x:80+Math.random()*2640,y:80+Math.random()*1640,type,color:info[2],taken:false})}bossHp=world===1?1000:0;cam.x=hero.x;cam.y=hero.y;updateUI()}
-let joy={on:false,x:0,y:0,pointerId:null};const joyEl=$('mobileJoy'),joyKnob=$('joyKnob');
-function resetJoy(){joy.on=false;joy.pointerId=null;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)'}
-function moveJoy(e){if(!joy.on||e.pointerId!==joy.pointerId)return;e.preventDefault();const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let x=e.clientX-cx,y=e.clientY-cy;const max=Math.max(20,r.width*.34),len=Math.hypot(x,y);if(len>max){x=x/len*max;y=y/len*max}const dead=6;if(Math.hypot(x,y)<dead){x=0;y=0}joy.x=x/max*45;joy.y=y/max*45;joyKnob.style.transform='translate('+x+'px,'+y+'px)'}
-joyEl.addEventListener('pointerdown',e=>{if(!mobileEnabled)return;e.preventDefault();joy.on=true;joy.pointerId=e.pointerId;joyEl.setPointerCapture(e.pointerId);moveJoy(e)});
-joyEl.addEventListener('pointermove',moveJoy);joyEl.addEventListener('pointerup',resetJoy);joyEl.addEventListener('pointercancel',resetJoy);joyEl.addEventListener('lostpointercapture',resetJoy);
+let joy={on:false,x:0,y:0,pointerId:null,cx:0,cy:0};
+const joyEl=$('mobileJoy'),joyKnob=$('joyKnob');
+function joyResetVisual(){joyKnob.style.transform='translate(-50%,-50%)'}
+function resetJoy(){joy.on=false;joy.pointerId=null;joy.x=0;joy.y=0;joy.cx=0;joy.cy=0;joyResetVisual()}
+function joyCenter(){const r=joyEl.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,max:Math.max(28,r.width*.36)}}
+function moveJoy(e){
+  if(!joy.on||e.pointerId!==joy.pointerId)return;
+  e.preventDefault();
+  let dx=e.clientX-joy.cx,dy=e.clientY-joy.cy;
+  const len=Math.hypot(dx,dy),max=joy.max;
+  if(len>max){dx=dx/len*max;dy=dy/len*max}
+  const mag=Math.hypot(dx,dy);
+  const dead=Math.min(10,max*.13);
+  if(mag<=dead){joy.x=0;joy.y=0;dx=0;dy=0}
+  else{
+    const scaled=(mag-dead)/(max-dead);
+    joy.x=dx/Math.max(mag,1)*scaled;
+    joy.y=dy/Math.max(mag,1)*scaled;
+  }
+  joyKnob.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';
+}
+function beginJoy(e){
+  if(!mobileEnabled||joy.on)return;
+  e.preventDefault();
+  const c=joyCenter();
+  joy.on=true;joy.pointerId=e.pointerId;joy.cx=c.x;joy.cy=c.y;joy.max=c.max;
+  try{joyEl.setPointerCapture(e.pointerId)}catch{}
+  moveJoy(e);
+}
+joyEl.addEventListener('pointerdown',beginJoy,{passive:false});
+joyEl.addEventListener('pointermove',moveJoy,{passive:false});
+joyEl.addEventListener('pointerup',e=>{if(e.pointerId===joy.pointerId)resetJoy()});
+joyEl.addEventListener('pointercancel',e=>{if(e.pointerId===joy.pointerId)resetJoy()});
+joyEl.addEventListener('lostpointercapture',resetJoy);
+joyEl.addEventListener('pointerleave',e=>{if(joy.on&&e.pointerId===joy.pointerId)moveJoy(e)});
+window.addEventListener('blur',resetJoy);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)resetJoy()});
+joyResetVisual();
 
 function update(dt){if(mode!=='game')return;attackCd=Math.max(0,attackCd-dt);abilityCd=Math.max(0,abilityCd-dt);if(hero.downed){
   hero.downedTimer-=dt;
