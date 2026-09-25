@@ -6,7 +6,7 @@
     const s=st(p),now=performance.now()/1000,dt=.016,dx=p.x-s.px,dy=p.y-s.py,moving=Math.hypot(dx,dy)>.08;s.px=p.x;s.py=p.y;
     if(moving)s.phase+=dt*9; else s.phase*=.92;
     if(typeof s.hp==='number'&&typeof p.hp==='number'&&p.hp<s.hp-.1)s.hit=.38;s.hp=p.hp;s.hit=Math.max(0,s.hit-dt);
-    const down=!!p.downed,attack=!down&&((p===window.hero&&window.attackCd>0)||p.attackTimer>0),main=team?'#61d9ff':'#d9f26b',outline='#11151b';
+    const down=!!p.downed,attack=!down&&p.attackTimer>0,main=team?'#61d9ff':'#d9f26b',outline='#11151b';
     const walk=Math.sin(s.phase),bob=down?0:(moving?Math.abs(walk)*2.3:Math.sin(now*2.3)*.7),hit=s.hit>0,recoil=hit?Math.sin(now*65)*2.5:0,leg=down?0:walk*7;
     ctx.save();ctx.translate(p.x+recoil,p.y+bob);if(down){ctx.rotate(-1.13+Math.sin(now*8)*.05);ctx.scale(1.18,.74)}else if(hit)ctx.rotate(Math.sin(now*55)*.07);else if(attack)ctx.rotate(.05);
     ctx.save();ctx.globalAlpha=.28;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,21,24,7,0,0,Math.PI*2);ctx.fill();ctx.restore();
