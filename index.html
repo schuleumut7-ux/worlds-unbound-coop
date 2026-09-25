@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Worlds Unbound — V1.17</title><link rel="stylesheet" href="style.css"></head>
 <body><div id="app">
-<div id="menu" class="screen"><div class="title"><div class="eyebrow">V1.17 • 2 PLAYER CO-OP ADVENTURE</div><h1>WORLDS<br><span>UNBOUND</span></h1><p>Explore. Fight. Survive. Together.</p></div><div class="panel"><input id="name" maxlength="16" placeholder="Your hero name" value="Hero"><div class="row"><button id="create">CREATE ROOM</button><button id="joinOpen">JOIN ROOM</button></div><button id="load">LOAD LOCAL HERO</button><small>V1.17: 2 Player CO-OP • 8 Worlds • Story • Bosses • Resources • Shop • XP • Mobile Controls • DOWNED System • Carry • Medic • 20s KO Timer • Animated Character</small></div></div>
+<div id="menu" class="screen"><div class="title"><div class="eyebrow">V1.17 • 2 PLAYER CO-OP ADVENTURE</div><h1>WORLDS<br><span>UNBOUND</span></h1><p>Explore. Fight. Survive. Together.</p></div><div class="panel"><input id="name" maxlength="16" placeholder="Your hero name" value="Hero"><div class="row"><button id="create">CREATE ROOM</button><button id="joinOpen">JOIN ROOM</button></div><button id="load">LOAD LOCAL HERO</button><small>V1.17: 2 Player CO-OP • 8 Worlds • Story • Bosses • Resources • Shop • XP • Mobile Controls • DOWNED System • Carry • Medic • 20s KO Timer • Animated Character • Synced Enemies</small></div></div>
 <div id="join" class="screen hidden"><div class="panel"><h2>JOIN CO-OP</h2><input id="code" maxlength="5" placeholder="X7K4P" class="code"><button id="join">JOIN ROOM</button><button id="back">BACK</button></div></div>
 <canvas id="game"></canvas>
 <div id="hud" class="hidden">
@@ -13,6 +13,6 @@
 <div class="inventory hidden" id="inventoryPanel"><h3>🎒 INVENTORY</h3><div id="invItems"></div><button id="invClose">CLOSE</button></div>
 <div class="settings hidden" id="settingsPanel"><h3>⚙️ EINSTELLUNGEN</h3><label class="settingRow"><span>Mobile Steuerung</span><input id="mobileToggle" type="checkbox"></label><p>Joystick links und Angriff rechts.</p><button id="settingsClose">ZURÜCK</button></div>
 <div class="shop hidden" id="shopPanel"><h3>🛒 MERCHANT</h3><p>Health Potion — 20 Coins</p><p>Med Kit — 35 Coins</p><p>Damage Upgrade — 80 Coins</p><button id="buyPotion">BUY POTION</button><button id="buyMed">BUY MED KIT</button><button id="buyDamage">BUY DAMAGE</button><button id="shopClose">CLOSE</button></div>
-<div class="bottom"><button id="attack">⚔</button><button id="ability">✦</button><button id="interact">E</button><button id="inventory">🎒</button></div>
-<div id="mobileControls"><div id="mobileJoy"><div id="joyKnob"></div></div><div id="mobileAttack"><button id="mobileAttackBtn">⚔</button><button id="mobileAbilityBtn">✦</button></div></div><div id="toast"></div></div></div>
+<div class="bottom"><button id="attack">⚔ O</button><button id="ability">✦</button><button id="interact">E</button><button id="inventory">🎒</button></div>
+<div id="mobileControls"><div id="mobileJoy"><div id="joyKnob"></div></div><div id="mobileDpad"><button data-key="arrowup">▲</button><button data-key="arrowleft">◀</button><button data-key="arrowdown">▼</button><button data-key="arrowright">▶</button></div><div id="mobileAttack"><button id="mobileAttackBtn">⚔</button><button id="mobileAbilityBtn">✦</button></div></div><div id="toast"></div></div></div>
 <script src="game.js"></script><script src="character.js"></script></body></html>
