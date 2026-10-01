@@ -123,4 +123,4 @@ wss.on('connection',ws=>{
   }
  });
 });
-server.listen(PORT,HOST,()=>console.log('Burger Mafia V3.0 CO-OP on '+HOST+':'+PORT));
+server.listen(PORT,HOST,()=>console.log('Burger Mafia V2.1 CO-OP on '+HOST+':'+PORT));
