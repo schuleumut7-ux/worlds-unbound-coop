@@ -2,6 +2,18 @@
 
 Online 2-player burger-shop simulator built with HTML, CSS, JavaScript and Node.js/WebSocket.
 
+## Neu in V2.1
+
+- Ladenname in den Einstellungen ändern und im gemeinsamen Raum synchronisieren.
+- Braune Stationen haben echte Kollisionen: durch Maschinen und Theken kann man nicht laufen.
+- Graue/weiße Felder sind die einzigen Interaktionsflächen für Stationen.
+- Die rechte Stationen-Hilfe wurde entfernt.
+- Mobile Aktion ist nur noch **✋ Interagieren**. Die zusätzlichen Kasse-/Q-Buttons sind entfernt.
+- Der manuelle Schicht-Ende-Button wurde durch eine automatische **Uhrzeit-/Tage-System** ersetzt.
+- Ein Tag dauert 5 Minuten Echtzeit und läuft von 08:00 bis 22:00 Spielzeit.
+- Das Tutorial-Feld oben links ist reine Info und keine Interaktionsfläche.
+- Das alte Save-Slot-/Save-Code-System bleibt entfernt.
+
 ## Starten
 
 ```bash
@@ -19,17 +31,13 @@ Spieler 2 klickt **CO-OP BEITRETEN**, gibt den Code ein und startet damit direkt
 
 ## Steuerung
 
-Desktop: **WASD / Pfeiltasten** bewegen und **E** interagieren.
+Desktop: **WASD / Pfeiltasten** bewegen und **E** bzw. die Interaktionsfläche benutzen.
 
-Mobil: **Joystick links** bewegen und **E / 💶 / Q** rechts benutzen. Der Joystick hält die Pointer-Verbindung auch dann wenn der Finger weit außerhalb des Joysticks ist und setzt sich beim Loslassen sicher zurück.
-
-Die Mobile-Steuerung kann später in **⚙️ Einstellungen** an- oder ausgeschaltet werden. Der Button für die Mobile-Steuerung im Startmenü bleibt technisch vorhanden wird aber nicht angezeigt.
+Mobil: **Joystick links** bewegen und **✋** rechts benutzen. Der Joystick hält die Pointer-Verbindung auch dann wenn der Finger weit außerhalb des Joysticks ist und setzt sich beim Loslassen sicher zurück.
 
 ## Spiel
 
 Bestellungen annehmen, Zutaten verbrauchen, Grill und Fritteuse timen, Burger bauen, an der Kasse Geld annehmen, korrekt Rückgeld geben, Personal einstellen und den Laden ausbauen.
-
-Die alte Save-Slot- und Save-Code-Funktion wurde aus V2.1 entfernt. Bereits vorhandene alte Browser-Save-Daten werden beim Start bereinigt.
 
 ## Render
 
