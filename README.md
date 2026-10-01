@@ -1,4 +1,4 @@
-# Burger Mafia V2.1 — 2 Player CO-OP
+# Burger Simulator V2.1 — 2 Player CO-OP
 
 Online 2-player burger-shop simulator built with HTML, CSS, JavaScript and Node.js/WebSocket.
 
