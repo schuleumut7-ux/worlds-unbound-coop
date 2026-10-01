@@ -101,10 +101,10 @@ const shopItems={
  shop:{label:'Laden-Ausbau',desc:'+maximale Kundenzahl',cost:1400,kind:'upgrade',key:'shop'}
 };
 function renderShop(){if(!$('shopList'))return;$('shopList').innerHTML=Object.entries(shopItems).map(([id,v])=>`<div class="shopItem"><div><strong>${v.label}</strong><small>${v.desc} • €${v.cost}</small></div><button data-buy="${id}">KAUFEN</button></div>`).join('');$('shopList').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buyShop(b.dataset.buy))}
-function buyShop(id){const v=shopItems[id];if(hero.money<v.cost)return toast('❌ Nicht genug Geld');hero.money-=v.cost;if(v.kind==='supply'){hero[v.key]+=v.amount;toast('📦 '+v.label+' gekauft')}else{hero.upgrades[v.key]++;toast('🔧 '+v.label+' Stufe '+hero.upgrades[v.key])}hero.shiftExpenses+=v.cost;hero.expensesToday+=v.cost;burst(hero.x,hero.y,12);ui();renderShop();saveAuto()}
+function buyShop(id){const v=shopItems[id];if(hero.money<v.cost)return toast('❌ Nicht genug Geld');hero.money-=v.cost;if(v.kind==='supply'){hero[v.key]+=v.amount;toast('📦 '+v.label+' gekauft')}else{hero.upgrades[v.key]++;toast('🔧 '+v.label+' Stufe '+hero.upgrades[v.key])}hero.shiftExpenses+=v.cost;hero.expensesToday+=v.cost;send('business',{action:'spend',amount:v.cost});burst(hero.x,hero.y,12);ui();renderShop();saveAuto()}
 function renderStaff(){const map={kitchen:'staffKitchen',cashier:'staffCash',cleaner:'staffClean'};for(const k of Object.keys(map))$(map[k]).textContent='Stufe '+hero.staff[k];}
 document.querySelectorAll('[data-staff]').forEach(b=>b.onclick=()=>hireStaff(b.dataset.staff));
-function hireStaff(k){const price=450+hero.staff[k]*350;if(hero.money<price)return toast('❌ Nicht genug Geld');hero.money-=price;hero.staff[k]++;hero.shiftExpenses+=price;hero.expensesToday+=price;toast('👨‍🍳 Personal Stufe '+hero.staff[k]);ui();renderStaff();saveAuto()}
+function hireStaff(k){const price=450+hero.staff[k]*350;if(hero.money<price)return toast('❌ Nicht genug Geld');hero.money-=price;hero.staff[k]++;hero.shiftExpenses+=price;hero.expensesToday+=price;send('business',{action:'spend',amount:price});toast('👨‍🍳 Personal Stufe '+hero.staff[k]);ui();renderStaff();saveAuto()}
 function finishStep(){if(!order)return;const step=order.steps[order.stepIndex];if(step==='bun'&&hero.bun>0){hero.bun--;prepDone('🍞 Brötchen vorbereitet')}
  else if(step==='grill'&&hero.patty>0){hero.patty--;prepDone('🔥 Patty gegrillt')}
  else if(step==='cheese'&&hero.cheese>0){hero.cheese--;prepDone('🧀 Käse aufgelegt')}
@@ -154,7 +154,7 @@ function openShift(){
 }
 function finishShift(){
  const gross=hero.shiftRevenue,expenses=hero.shiftExpenses,rent=120+hero.upgrades.shop*35,profit=Math.max(0,gross-expenses-rent),pay=Math.min(hero.debt,Math.floor(Math.max(0,profit)*.2));
- hero.money=Math.max(0,hero.money-rent-pay);hero.debt=Math.max(0,hero.debt-pay);hero.day++;hero.revenueToday=0;hero.expensesToday=0;hero.shiftRevenue=0;hero.shiftExpenses=0;
+ hero.money=Math.max(0,hero.money-rent-pay);hero.debt=Math.max(0,hero.debt-pay);hero.day++;send('business',{action:'day'});hero.revenueToday=0;hero.expensesToday=0;hero.shiftRevenue=0;hero.shiftExpenses=0;
  hero.cleanliness=Math.max(65,hero.cleanliness-8+hero.staff.cleaner*4);if(hero.staff.cleaner===0)hero.cleanliness-=5;hero.rating=Math.max(1,Math.min(5,hero.rating+(hero.cleanliness>75?.08:-.12)));
  $('shiftPanel').classList.add('hidden');toast('🌙 SCHICHT '+hero.day+' STARTET');makeOrder();saveAuto();ui()
 }
