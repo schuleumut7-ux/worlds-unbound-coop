@@ -25,20 +25,18 @@ function makeCode(){
  do{s=Array.from({length:5},()=>chars[Math.floor(Math.random()*chars.length)]).join('')}while(rooms.has(s));
  return s;
 }
-function cleanName(v){return String(v||'Hero').replace(/[<>]/g,'').slice(0,16)||'Hero'}
+function cleanName(v){return String(v||'Hero').replace(/[<>]/g,'').trim().slice(0,16)||'Hero'}
+function cleanCode(v){return String(v||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5)}
 function send(ws,type,data={}){if(ws.readyState===1)ws.send(JSON.stringify({type,...data}))}
 function broadcast(room,type,data={},except=null){for(const p of room.players.values())if(p.ws!==except)send(p.ws,type,data)}
-function snapPlayer(p){return{id:p.id,name:p.name,x:p.x,y:p.y,money:p.money,debt:p.debt,day:p.day,level:p.level}}
+function snapPlayer(p){return{id:p.id,name:p.name,x:p.x,y:p.y}}
 function state(room){return{
  code:room.code,host:room.host,
  business:{money:room.business.money,debt:room.business.debt,day:room.business.day},
  players:[...room.players.values()].map(snapPlayer)
 }}
 function makeRoom(){
- return{
-  code:makeCode(),host:null,players:new Map(),
-  business:{money:500,debt:1000000,day:1}
- };
+ return{code:makeCode(),host:null,players:new Map(),business:{money:500,debt:1000000,day:1}};
 }
 
 const server=http.createServer(async(req,res)=>{
@@ -53,40 +51,43 @@ const server=http.createServer(async(req,res)=>{
  }catch{res.writeHead(404);res.end('Not found')}
 });
 
-const wss=new WebSocketServer({server});
+const wss=new WebSocketServer({server,maxPayload:8192});
 wss.on('connection',ws=>{
+ ws.isAlive=true;
+ ws.on('pong',()=>ws.isAlive=true);
+
  ws.on('message',raw=>{
   let m;try{m=JSON.parse(raw)}catch{return}
   if(!m||typeof m.type!=='string')return;
 
   if(m.type==='create'){
-   const room=makeRoom();
-   const id=randomBytes(4).toString('hex');
-   const p={id,ws,name:cleanName(m.name),x:SPAWN_X,y:SPAWN_Y,money:room.business.money,debt:room.business.debt,day:room.business.day};
+   if(ws.room)return send(ws,'error',{message:'Du bist schon in einem Raum.'});
+   const room=makeRoom(),id=randomBytes(4).toString('hex');
+   const p={id,ws,name:cleanName(m.name),x:SPAWN_X,y:SPAWN_Y};
    room.host=id;room.players.set(id,p);rooms.set(room.code,room);ws.room=room;ws.pid=id;
    send(ws,'roomCreated',{code:room.code,id});send(ws,'state',state(room));return;
   }
 
   if(m.type==='join'){
-   const room=rooms.get(String(m.code||'').trim().toUpperCase());
-   if(!room||room.players.size>=2)return send(ws,'error',{message:'Room nicht gefunden oder voll.'});
+   if(ws.room)return send(ws,'error',{message:'Du bist schon in einem Raum.'});
+   const code=cleanCode(m.code),room=rooms.get(code);
+   if(!code||code.length!==5)return send(ws,'error',{message:'Ungültiger Raumcode.'});
+   if(!room)return send(ws,'error',{message:'Raum nicht gefunden.'});
+   if(room.players.size>=2)return send(ws,'error',{message:'Der Raum ist schon voll.'});
    const id=randomBytes(4).toString('hex');
-   const p={id,ws,name:cleanName(m.name),x:SPAWN_X+65,y:SPAWN_Y,money:room.business.money,debt:room.business.debt,day:room.business.day};
+   const p={id,ws,name:cleanName(m.name),x:SPAWN_X+65,y:SPAWN_Y};
    room.players.set(id,p);ws.room=room;ws.pid=id;
    send(ws,'joined',{code:room.code,id});broadcast(room,'state',state(room));send(ws,'state',state(room));return;
   }
 
-  const room=ws.room;
-  const p=room?.players.get(ws.pid);
-  if(!room||!p)return;
+  const room=ws.room,p=room?.players.get(ws.pid);
+  if(!room||!p)return send(ws,'error',{message:'Zuerst einen Raum erstellen oder beitreten.'});
 
   if(m.type==='input'){
    const x=Number(m.x),y=Number(m.y);
    if(Number.isFinite(x))p.x=Math.max(80,Math.min(WORLD_W-80,x));
    if(Number.isFinite(y))p.y=Math.max(80,Math.min(WORLD_H-80,y));
-   p.money=room.business.money;p.debt=room.business.debt;p.day=room.business.day;
-   broadcast(room,'state',state(room));
-   return;
+   broadcast(room,'state',state(room));return;
   }
 
   if(m.type==='business'){
@@ -97,22 +98,22 @@ wss.on('connection',ws=>{
     if(amount<=0)return;
     room.business.money=Math.min(99999999,room.business.money+amount);
     room.business.debt=Math.max(0,room.business.debt-Math.round(profit*.2*100)/100);
-    for(const q of room.players.values()){q.money=room.business.money;q.debt=room.business.debt;q.day=room.business.day}
-    broadcast(room,'sale',{amount,profit});broadcast(room,'state',state(room));return;
+    broadcast(room,'sale',{amount,profit});
+    broadcast(room,'state',state(room));return;
    }
    if(a==='spend'){
-    const amount=Math.max(0,Math.min(room.business.money,Number(m.amount)||0));
+    const requested=Math.max(0,Number(m.amount)||0);
+    const amount=Math.min(room.business.money,Math.min(100000,requested));
     room.business.money=Math.max(0,room.business.money-amount);
-    for(const q of room.players.values())q.money=room.business.money;
     broadcast(room,'state',state(room));return;
    }
    if(a==='day'){
     room.business.day=Math.max(1,Math.min(999,room.business.day+1));
-    for(const q of room.players.values())q.day=room.business.day;
     broadcast(room,'state',state(room));return;
    }
   }
  });
+
  ws.on('close',()=>{
   const room=ws.room;if(!room)return;
   room.players.delete(ws.pid);
@@ -122,5 +123,15 @@ wss.on('connection',ws=>{
    broadcast(room,'state',state(room));
   }
  });
+ ws.on('error',()=>{});
 });
-server.listen(PORT,HOST,()=>console.log('Burger Mafia V2.1 CO-OP on '+HOST+':'+PORT));
+
+const heartbeat=setInterval(()=>{
+ for(const ws of wss.clients){
+  if(ws.isAlive===false){try{ws.terminate()}catch{};continue}
+  ws.isAlive=false;try{ws.ping()}catch{}
+ }
+},30000);
+wss.on('close',()=>clearInterval(heartbeat));
+
+server.listen(PORT,HOST,()=>console.log('Burger Mafia V2.1 CO-OP ready on '+HOST+':'+PORT));
