@@ -1,24 +1,39 @@
-# Worlds Unbound Co-op
+# Burger Mafia V2.1 — 2 Player CO-OP
 
-2-player online top-down co-op adventure built with HTML, CSS, JavaScript and Node.js/WebSocket.
+Online 2-player burger-shop simulator built with HTML, CSS, JavaScript and Node.js/WebSocket.
 
-## Run locally
+## Starten
 
 ```bash
 npm install
 npm start
 ```
 
-Open `http://localhost:3000` in a browser.
+Dann `http://localhost:3000` öffnen.
 
-## Deploy on Render
+## Online CO-OP
 
-- Create a Render **Web Service** from this repository.
+Spieler 1 klickt **LADEN ERSTELLEN** und bekommt direkt die Spielwelt. Der 5-stellige ROOM-Code erscheint oben im Spiel.
+
+Spieler 2 klickt **CO-OP BEITRETEN**, gibt den Code ein und startet damit direkt im gemeinsamen Laden.
+
+## Steuerung
+
+Desktop: **WASD / Pfeiltasten** bewegen und **E** interagieren.
+
+Mobil: **Joystick links** bewegen und **E / 💶 / Q** rechts benutzen. Der Joystick hält die Pointer-Verbindung auch dann wenn der Finger weit außerhalb des Joysticks ist und setzt sich beim Loslassen sicher zurück.
+
+Die Mobile-Steuerung kann später in **⚙️ Einstellungen** an- oder ausgeschaltet werden. Der Button für die Mobile-Steuerung im Startmenü bleibt technisch vorhanden wird aber nicht angezeigt.
+
+## Spiel
+
+Bestellungen annehmen, Zutaten verbrauchen, Grill und Fritteuse timen, Burger bauen, an der Kasse Geld annehmen, korrekt Rückgeld geben, Personal einstellen und den Laden ausbauen.
+
+Die alte Save-Slot- und Save-Code-Funktion wurde aus V2.1 entfernt. Bereits vorhandene alte Browser-Save-Daten werden beim Start bereinigt.
+
+## Render
+
 - Build Command: `npm install`
 - Start Command: `npm start`
-- The server uses Render's `PORT` automatically.
-- Open the generated `https://...onrender.com` URL on both devices.
-- Player 1 chooses **CREATE ROOM** and shares the 5-character room code.
-- Player 2 chooses **JOIN ROOM** and enters the code.
-
-The server serves the game files and the WebSocket multiplayer connection from the same URL. HTTPS automatically uses secure WebSockets in the client.
+- Der Server nutzt `PORT` automatisch.
+- Die gleiche Render-URL wird auf beiden Geräten geöffnet.
