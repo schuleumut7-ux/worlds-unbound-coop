@@ -134,4 +134,4 @@ const heartbeat=setInterval(()=>{
 },30000);
 wss.on('close',()=>clearInterval(heartbeat));
 
-server.listen(PORT,HOST,()=>console.log('Burger Mafia V2.1 CO-OP ready on '+HOST+':'+PORT));
+server.listen(PORT,HOST,()=>console.log('Burger Simulator V2.1 CO-OP ready on '+HOST+':'+PORT));
