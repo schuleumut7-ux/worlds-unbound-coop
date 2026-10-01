@@ -38,10 +38,11 @@
 
 <div id="hud" class="hidden">
   <header>
-    <div class="brand">🍔 <b>BURGER SIMULATOR</b><small id="shiftLabel">SCHICHT 1</small></div>
+    <div class="brand">🍔 <b id="shopNameLabel">BURGER SIMULATOR</b><small id="shiftLabel">TAG 1 • 08:00</small></div>
     <div class="roomChip">ROOM <strong id="room">—</strong><i id="connectionDot"></i></div>
     <div class="moneyChip">💰 <strong id="money">500</strong>€</div>
     <div class="debtChip">📉 <strong id="debt">1.000.000</strong>€</div>
+    <div class="clockChip">🕒 <strong id="gameClock">08:00</strong></div>
     <div class="statChip">⭐ LV <strong id="level">1</strong></div>
     <div class="statChip">👥 <strong id="playerCount">1/2</strong></div>
     <button id="settings" aria-label="Einstellungen">⚙️</button>
@@ -55,21 +56,18 @@
     <small id="orderHint">Geht zu einer Station und drückt E.</small>
   </div>
 
-  <div class="stationGuide">
-    <div>🍞 <b>BUN</b><small>Brötchen</small></div>
-    <div>🔥 <b>GRILL</b><small>Patty</small></div>
-    <div>🧀 <b>ASSEMBLY</b><small>Zusammenbauen</small></div>
-    <div>🍟 <b>FRYER</b><small>Pommes</small></div>
-    <div>💵 <b>KASSE</b><small>Bezahlen</small></div>
-  </div>
-
   <div class="rightTools">
     <button id="inventoryBtn">🎒 INVENTAR</button>
     <button id="shopBtn">🛒 SHOP</button>
     <button id="staffBtn">👨‍🍳 PERSONAL</button>
-    <button id="shiftBtn">🌙 SCHICHT BEENDEN</button>
   </div>
 
+  <div id="tutorialInfo" class="tutorialInfo">
+    <b>📖 TUTORIAL INFOS</b>
+    <span>Stell dich auf die grauen Felder vor den Stationen.</span>
+    <span>✋ Dann interagieren.</span>
+    <span>💶 Bezahlen geht nur auf dem grauen Kassenfeld.</span>
+  </div>
   <div id="objectiveBar">🎯 Ziel: Verdient Geld und zahlt die Mafia-Schulden zurück.</div>
   <div class="help">WASD / Pfeile bewegen • E Interagieren • Q Bestellung • I Inventar • U Shop</div>
   <div id="toast"></div>
@@ -77,9 +75,7 @@
   <div id="mobile">
     <div id="joy" aria-label="Bewegungsjoystick"><i></i></div>
     <div id="actions">
-      <button id="mInteract" aria-label="Interagieren">E</button>
-      <button id="mCash" aria-label="Kasse">💶</button>
-      <button id="mRecipe" aria-label="Neue Bestellung">Q</button>
+      <button id="mInteract" aria-label="Interagieren">✋</button>
     </div>
   </div>
 
@@ -120,16 +116,15 @@
   <div id="settingsPanel" class="modal hidden">
     <div class="modalTag">⚙️ OPTIONEN</div><h2>EINSTELLUNGEN</h2>
     <label class="toggleRow">Mobile Steuerung <input id="mobileToggle" type="checkbox"></label>
+    <label class="settingLabel">Ladenname
+      <input id="shopNameInput" maxlength="24" value="BURGER SIMULATOR" placeholder="z.B. Burger King">
+    </label>
+    <button id="saveShopName">✅ LADENNAME SPEICHERN</button>
+    <p>Der Ladenname wird für beide Spieler im aktuellen Raum übernommen.</p>
     <p>Der Joystick bleibt aktiv auf Touch-Geräten und lässt sich hier komplett an- oder ausschalten.</p>
     <button id="settingsClose" class="ghost">ZURÜCK</button>
   </div>
 
-  <div id="shiftPanel" class="modal hidden">
-    <div class="modalTag">🌙 TAGESABSCHLUSS</div><h2>SCHICHT BEENDEN</h2>
-    <div id="shiftSummary"></div>
-    <button id="shiftConfirm">✅ ABSCHLUSS & WEITER</button>
-    <button id="shiftCancel" class="ghost">WEITERARBEITEN</button>
-  </div>
 </div>
 
 <div id="storyPanel" class="modal hidden">
