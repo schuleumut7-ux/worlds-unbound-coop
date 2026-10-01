@@ -11,6 +11,7 @@ const ROOT=fileURLToPath(new URL('.',import.meta.url));
 const rooms=new Map();
 const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const WORLD_W=1500,WORLD_H=900,SPAWN_X=650,SPAWN_Y=610;
+const DAY_DURATION_MS=300000;
 
 const MIME={
  '.html':'text/html; charset=utf-8',
@@ -27,16 +28,17 @@ function makeCode(){
 }
 function cleanName(v){return String(v||'Hero').replace(/[<>]/g,'').trim().slice(0,16)||'Hero'}
 function cleanCode(v){return String(v||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5)}
+function cleanShopName(v){return String(v||'BURGER SIMULATOR').replace(/[<>]/g,'').replace(/\s+/g,' ').trim().slice(0,24)||'BURGER SIMULATOR'}
 function send(ws,type,data={}){if(ws.readyState===1)ws.send(JSON.stringify({type,...data}))}
 function broadcast(room,type,data={},except=null){for(const p of room.players.values())if(p.ws!==except)send(p.ws,type,data)}
 function snapPlayer(p){return{id:p.id,name:p.name,x:p.x,y:p.y}}
 function state(room){return{
  code:room.code,host:room.host,
- business:{money:room.business.money,debt:room.business.debt,day:room.business.day},
+ business:{money:room.business.money,debt:room.business.debt,day:room.business.day,shopName:room.business.shopName,dayStartedAt:room.business.dayStartedAt},
  players:[...room.players.values()].map(snapPlayer)
 }}
 function makeRoom(){
- return{code:makeCode(),host:null,players:new Map(),business:{money:500,debt:1000000,day:1}};
+ return{code:makeCode(),host:null,players:new Map(),business:{money:500,debt:1000000,day:1,shopName:'BURGER SIMULATOR',dayStartedAt:Date.now()}};
 }
 
 const server=http.createServer(async(req,res)=>{
@@ -92,6 +94,11 @@ wss.on('connection',ws=>{
 
   if(m.type==='business'){
    const a=m.action;
+   if(a==='setShopName'){
+    room.business.shopName=cleanShopName(m.shopName);
+    broadcast(room,'state',state(room));
+    return;
+   }
    if(a==='sale'){
     const amount=Math.max(0,Math.min(40,Number(m.amount)||0));
     const profit=Math.max(0,Math.min(amount,Number(m.profit)||0));
@@ -135,3 +142,16 @@ const heartbeat=setInterval(()=>{
 wss.on('close',()=>clearInterval(heartbeat));
 
 server.listen(PORT,HOST,()=>console.log('Burger Simulator V2.1 CO-OP ready on '+HOST+':'+PORT));
+
+setInterval(()=>{
+ const now=Date.now();
+ for(const room of rooms.values()){
+  if(now-room.business.dayStartedAt>=DAY_DURATION_MS){
+   const days=Math.max(1,Math.floor((now-room.business.dayStartedAt)/DAY_DURATION_MS));
+   room.business.day=Math.min(999,room.business.day+days);
+   room.business.dayStartedAt+=days*DAY_DURATION_MS;
+   broadcast(room,'dayEnded',{day:room.business.day});
+   broadcast(room,'state',state(room));
+  }
+ }
+},1000);
