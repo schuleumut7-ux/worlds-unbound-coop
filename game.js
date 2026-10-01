@@ -430,7 +430,7 @@ function drawKitchen(t){
  ctx.fillStyle='#5b4230';rr(278,98,954,704,25);
  ctx.fillStyle='#684a33';for(let y=115;y<790;y+=32)ctx.fillRect(292,y,926,3);for(let x=292;x<1218;x+=38)ctx.fillRect(x,115,3,790);
  ctx.fillStyle='#111614';rr(410,102,680,48,12);ctx.fillStyle='#ffb52f';ctx.shadowBlur=22;ctx.shadowColor='#ff9e28';ctx.fillRect(640,116,220,5);ctx.shadowBlur=0;
- txt('BURGER MAFIA',750,137,20,'#ffd477');
+ txt('BURGER SIMULATOR',750,137,20,'#ffd477');
  for(let i=0;i<7;i++){const sx=460+i*98;ctx.fillStyle=i%2?'#ffbe49':'#f9e1a5';ctx.globalAlpha=.25+.15*pulse;ctx.beginPath();ctx.arc(sx,91,4,0,7);ctx.fill();ctx.globalAlpha=1}
  drawFridge();drawCounter();drawStations(t);drawQueue(t);
 }
