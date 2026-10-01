@@ -49,7 +49,6 @@ function ui(){
  $('orderTimer').textContent=order?Math.max(0,Math.ceil(order.timer))+'s':'—';$('orderHint').textContent=order?stepHint():'Neue Gäste kommen gleich.';
  const done=order?Math.min(1,order.stepIndex/order.steps.length):0;$('orderProgress').style.width=(done*100)+'%';
  document.body.classList.toggle('mobileOn',mobile);if($('mobileToggle'))$('mobileToggle').checked=mobile;
- renderInventory();renderShop();renderStaff();
 }
 function stepHint(){if(!order)return '';const s=order.steps[order.stepIndex];return s==='cash'?'Geld annehmen und korrekt Rückgeld geben.':`Station: ${station[s].label} — E drücken`}
 function makeOrder(){const base=recipes[Math.floor(Math.random()*recipes.length)];order={...base,steps:[...base.steps],stepIndex:0,timer:42+Math.max(0,hero.day-1)*1.5};prep={step:-1,readyAt:0,overAt:0,started:false};ui()}
@@ -68,9 +67,9 @@ $('how').onclick=()=>$('storyPanel').classList.remove('hidden');$('storyClose').
 $('settings').onclick=()=>$('settingsPanel').classList.remove('hidden');$('settingsClose').onclick=()=>$('settingsPanel').classList.add('hidden');
 $('mobileToggle').onchange=e=>{mobile=e.target.checked;localStorage.setItem('bm-mobile',mobile?'1':'0');ui();toast(mobile?'Mobile Steuerung AN':'Mobile Steuerung AUS')};
 $('load').onclick=()=>$('savePanel').classList.remove('hidden');$('saveClose').onclick=()=>$('savePanel').classList.add('hidden');
-$('inventoryBtn').onclick=()=>$('inventoryPanel').classList.remove('hidden');$('inventoryClose').onclick=()=>$('inventoryPanel').classList.add('hidden');
-$('shopBtn').onclick=()=>$('shopPanel').classList.remove('hidden');$('shopClose').onclick=()=>$('shopPanel').classList.add('hidden');
-$('staffBtn').onclick=()=>$('staffPanel').classList.remove('hidden');$('staffClose').onclick=()=>$('staffPanel').classList.add('hidden');
+$('inventoryBtn').onclick=()=>{$('inventoryPanel').classList.remove('hidden');renderInventory()};$('inventoryClose').onclick=()=>$('inventoryPanel').classList.add('hidden');
+$('shopBtn').onclick=()=>{$('shopPanel').classList.remove('hidden');renderShop()};$('shopClose').onclick=()=>$('shopPanel').classList.add('hidden');
+$('staffBtn').onclick=()=>{$('staffPanel').classList.remove('hidden');renderStaff()};$('staffClose').onclick=()=>$('staffPanel').classList.add('hidden');
 $('shiftBtn').onclick=openShift; $('shiftCancel').onclick=()=>$('shiftPanel').classList.add('hidden');
 $('shiftConfirm').onclick=finishShift;
 function getSave(){return JSON.parse(localStorage.getItem('bm-last-save')||'null')}
@@ -102,10 +101,10 @@ const shopItems={
  shop:{label:'Laden-Ausbau',desc:'+maximale Kundenzahl',cost:1400,kind:'upgrade',key:'shop'}
 };
 function renderShop(){if(!$('shopList'))return;$('shopList').innerHTML=Object.entries(shopItems).map(([id,v])=>`<div class="shopItem"><div><strong>${v.label}</strong><small>${v.desc} • €${v.cost}</small></div><button data-buy="${id}">KAUFEN</button></div>`).join('');$('shopList').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buyShop(b.dataset.buy))}
-function buyShop(id){const v=shopItems[id];if(hero.money<v.cost)return toast('❌ Nicht genug Geld');hero.money-=v.cost;if(v.kind==='supply'){hero[v.key]+=v.amount;toast('📦 '+v.label+' gekauft')}else{hero.upgrades[v.key]++;toast('🔧 '+v.label+' Stufe '+hero.upgrades[v.key])}hero.shiftExpenses+=v.cost;hero.expensesToday+=v.cost;burst(hero.x,hero.y,12);ui();saveAuto()}
+function buyShop(id){const v=shopItems[id];if(hero.money<v.cost)return toast('❌ Nicht genug Geld');hero.money-=v.cost;if(v.kind==='supply'){hero[v.key]+=v.amount;toast('📦 '+v.label+' gekauft')}else{hero.upgrades[v.key]++;toast('🔧 '+v.label+' Stufe '+hero.upgrades[v.key])}hero.shiftExpenses+=v.cost;hero.expensesToday+=v.cost;burst(hero.x,hero.y,12);ui();renderShop();saveAuto()}
 function renderStaff(){const map={kitchen:'staffKitchen',cashier:'staffCash',cleaner:'staffClean'};for(const k of Object.keys(map))$(map[k]).textContent='Stufe '+hero.staff[k];}
 document.querySelectorAll('[data-staff]').forEach(b=>b.onclick=()=>hireStaff(b.dataset.staff));
-function hireStaff(k){const price=450+hero.staff[k]*350;if(hero.money<price)return toast('❌ Nicht genug Geld');hero.money-=price;hero.staff[k]++;hero.shiftExpenses+=price;hero.expensesToday+=price;toast('👨‍🍳 Personal Stufe '+hero.staff[k]);ui();saveAuto()}
+function hireStaff(k){const price=450+hero.staff[k]*350;if(hero.money<price)return toast('❌ Nicht genug Geld');hero.money-=price;hero.staff[k]++;hero.shiftExpenses+=price;hero.expensesToday+=price;toast('👨‍🍳 Personal Stufe '+hero.staff[k]);ui();renderStaff();saveAuto()}
 function finishStep(){if(!order)return;const step=order.steps[order.stepIndex];if(step==='bun'&&hero.bun>0){hero.bun--;prepDone('🍞 Brötchen vorbereitet')}
  else if(step==='grill'&&hero.patty>0){hero.patty--;prepDone('🔥 Patty gegrillt')}
  else if(step==='cheese'&&hero.cheese>0){hero.cheese--;prepDone('🧀 Käse aufgelegt')}
