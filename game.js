@@ -3,7 +3,10 @@ const $=id=>document.getElementById(id),c=$('game'),ctx=c.getContext('2d');
 const touchDevice=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 let savedMobile=null;
 try{savedMobile=localStorage.getItem('bm-mobile')}catch{}
-let W,H,DPR,mode='menu',ws=null,room='',me='',mobile=touchDevice?true:(savedMobile==='1');
+let W,H,DPR,mode='menu',ws=null,room='',me='',shopName='BURGER SIMULATOR',dayStartedAt=0,mobile=touchDevice?true:(savedMobile==='1');
+const DAY_LENGTH_MS=300000;
+const DAY_START_MINUTES=8*60;
+const DAY_END_MINUTES=22*60;
 let connection='offline',connectBusy=false,connectTimer=0;
 let last=performance.now(),keys=new Set(),joy={on:false,x:0,y:0},particles=[],floats=[],others=new Map(),activeTouch=null;
 const recipes=[
@@ -21,6 +24,30 @@ const station={
  fryer:{x:1065,y:205,label:'FRYER',color:'#e5a52f',emoji:'🍟'},
  cash:{x:1065,y:450,label:'KASSE',color:'#5bc78b',emoji:'💵'}
 };
+const interactionPad={
+ bun:{x:470,y:395,w:104,h:62},
+ grill:{x:660,y:295,w:104,h:62},
+ cheese:{x:660,y:515,w:104,h:62},
+ assembly:{x:875,y:400,w:104,h:62},
+ fryer:{x:1065,y:290,w:104,h:62},
+ cash:{x:1065,y:535,w:104,h:62}
+};
+function insidePad(pad,x,y,margin=0){
+ return x>=pad.x-pad.w/2-margin&&x<=pad.x+pad.w/2+margin&&y>=pad.y-pad.h/2-margin&&y<=pad.y+pad.h/2+margin;
+}
+function circleHitsRect(x,y,r,rect){
+ const qx=Math.max(rect.x,Math.min(x,rect.x+rect.w));
+ const qy=Math.max(rect.y,Math.min(y,rect.y+rect.h));
+ return Math.hypot(x-qx,y-qy)<r;
+}
+function hitsStationBody(x,y){
+ for(const p of Object.values(station)){
+  const rect={x:p.x-56,y:p.y-43,w:112,h:86};
+  if(circleHitsRect(x,y,22,rect))return true;
+ }
+ return false;
+}
+
 const supplyInfo={
  bun:{label:'Brötchen',unit:'🍞',price:18},
  patty:{label:'Pattys',unit:'🥩',price:32},
@@ -68,13 +95,24 @@ function burst(x,y,n=12,col='#ffbd43'){for(let i=0;i<n;i++)particles.push({x,y,v
 function saveMobilePreference(value){try{localStorage.setItem('bm-mobile',value?'1':'0')}catch{}}
 function updateMobileStart(){setText('mobileStartState',mobile?'AN':'AUS')}
 
+function clockInfo(now=Date.now()){
+ const started=Number(dayStartedAt)||now;
+ const elapsed=Math.max(0,Math.min(DAY_LENGTH_MS,now-started));
+ const progress=elapsed/DAY_LENGTH_MS;
+ const minutes=Math.min(DAY_END_MINUTES,Math.floor(DAY_START_MINUTES+(DAY_END_MINUTES-DAY_START_MINUTES)*progress));
+ const hh=String(Math.floor(minutes/60)).padStart(2,'0');
+ const mm=String(minutes%60).padStart(2,'0');
+ return {text:hh+':'+mm,remaining:Math.max(0,DAY_LENGTH_MS-elapsed)};
+}
 function ui(){
  setText('money',Math.floor(hero.money).toLocaleString('de-DE'));
  setText('debt',Math.max(0,Math.floor(hero.debt)).toLocaleString('de-DE'));
  setText('level',hero.level);
  setText('room',room||'—');
  setText('playerCount',(1+others.size)+'/2');
- setText('shiftLabel','SCHICHT '+hero.day);
+ setText('shopNameLabel',shopName);
+ setText('shiftLabel','TAG '+hero.day+' • '+clockInfo().text);
+ setText('gameClock',clockInfo().text);
  setText('orderName',order?order.name:'Keine Bestellung');
  setText('recipeLine',order?order.icons:'Warte auf Kunden…');
  setText('orderTimer',order?Math.max(0,Math.ceil(order.timer))+'s':'—');
@@ -86,13 +124,14 @@ function ui(){
  const dot=$('connectionDot');
  if(dot){dot.className=connection==='connected'?'online':connection==='connecting'?'connecting':'offline'}
  if($('mobileToggle'))$('mobileToggle').checked=mobile;
+ if($('shopNameInput')&&document.activeElement!==$('shopNameInput'))$('shopNameInput').value=shopName;
  updateMobileStart();
 }
 function stepHint(){
  if(!order)return '';
  const s=order.steps[order.stepIndex];
  if(!s&&order.stepIndex>=order.steps.length)return 'Burger fertig — zur Kasse gehen.';
- return s==='cash'?'Geld annehmen und korrekt Rückgeld geben.':'Station: '+station[s].label+' — E drücken';
+ return s==='cash'?'Geld annehmen und korrekt Rückgeld geben.':'Station: '+station[s].label+' — E / ✋ interagieren';
 }
 function makeOrder(){
  const base=recipes[Math.floor(Math.random()*recipes.length)];
@@ -133,6 +172,7 @@ function connect(type,code=''){
   }
   if(m.type==='state'){
    room=m.code||room;
+   applyBusiness(m.business||{});
    const seen=new Set();
    for(const p of m.players||[]){
     if(p.id===me){
@@ -146,6 +186,7 @@ function connect(type,code=''){
    ui();
   }
   if(m.type==='sale'){toast('💵 CO-OP Verkauf: '+fmt(m.amount)+' €');burst(hero.x,hero.y,18)}
+  if(m.type==='dayEnded'){toast('🌙 TAG '+((m.day)||hero.day)+' STARTET');hero.revenueToday=0;hero.expensesToday=0;hero.shiftRevenue=0;hero.shiftExpenses=0;makeOrder();ui()}
   if(m.type==='error'){connectBusy=false;connection='offline';clearTimeout(connectTimer);ui();toast('❌ '+m.message)}
  };
  ws.onerror=()=>{connection='offline';connectBusy=false;ui()};
@@ -189,6 +230,14 @@ $('mobileStartToggle').onclick=()=>{
  mobile=!mobile;saveMobilePreference(mobile);ui();
  toast(mobile?'📱 MOBILE STEUERUNG AN':'📱 MOBILE STEUERUNG AUS');
 };
+$('saveShopName').onclick=()=>{
+ const v=String($('shopNameInput')?.value||'').replace(/\s+/g,' ').trim().slice(0,24);
+ if(!v)return toast('⚠️ Bitte einen Ladenname eingeben.');
+ shopName=v;
+ send('business',{action:'setShopName',shopName:v});
+ ui();
+ toast('✅ Ladenname geändert: '+v);
+};
 
 $('inventoryBtn').onclick=()=>{$('inventoryPanel').classList.remove('hidden');renderInventory()};
 $('inventoryClose').onclick=()=>$('inventoryPanel').classList.add('hidden');
@@ -196,9 +245,7 @@ $('shopBtn').onclick=()=>{$('shopPanel').classList.remove('hidden');renderShop()
 $('shopClose').onclick=()=>$('shopPanel').classList.add('hidden');
 $('staffBtn').onclick=()=>{$('staffPanel').classList.remove('hidden');renderStaff()};
 $('staffClose').onclick=()=>$('staffPanel').classList.add('hidden');
-$('shiftBtn').onclick=openShift;
-$('shiftCancel').onclick=()=>$('shiftPanel').classList.add('hidden');
-$('shiftConfirm').onclick=finishShift;
+
 
 function renderInventory(){
  const vals=[
@@ -263,10 +310,9 @@ function prepDone(msg){
  addFloat(msg,hero.x,hero.y-45);burst(hero.x,hero.y,9);hero.xp+=10;levelCheck();ui();
 }
 function getNearestStation(){
- let near=null,d=Infinity;
- for(const [k,p] of Object.entries(station)){
-  const dd=Math.hypot(hero.x-p.x,hero.y-p.y);
-  if(dd<78&&dd<d){near=k;d=dd}
+ let near=null;
+ for(const [k,pad] of Object.entries(interactionPad)){
+  if(insidePad(pad,hero.x,hero.y,7)){near=k;break}
  }
  return near;
 }
@@ -312,8 +358,6 @@ document.querySelectorAll('[data-cash]').forEach(b=>b.onclick=()=>{
 $('cashCancel').onclick=()=>{$('cashPanel').classList.add('hidden');cash.open=false};
 $('cashAccept').onclick=takePayment;
 $('mInteract').onclick=tryInteract;
-$('mCash').onclick=()=>{if(order&&order.stepIndex>=order.steps.length)openCash();else tryInteract()};
-$('mRecipe').onclick=makeOrder;
 $('cashInput').addEventListener('input',()=>{
  const got=Number(String($('cashInput').value).replace(',','.'))||0;
  setText('cashChange','€'+fmt(Math.max(0,got-cash.due)));
@@ -341,27 +385,6 @@ function levelCheck(){
  const need=100+hero.level*60;
  while(hero.xp>=need){hero.xp-=need;hero.level++;hero.money+=80;hero.rating=Math.min(5,hero.rating+.05);toast('⭐ LEVEL UP! STUFE '+hero.level);burst(hero.x,hero.y,35,'#ffe070')}
 }
-function openShift(){
- const gross=hero.shiftRevenue,expenses=hero.shiftExpenses,profit=Math.max(0,gross-expenses);
- const rent=120+hero.upgrades.shop*35,debtPay=Math.min(hero.debt,Math.floor(Math.max(0,profit-rent)*.2));
- $('shiftSummary').innerHTML='<div class="summaryRow"><span>Umsatz</span><b>€'+fmt(gross)+'</b></div>'+
- '<div class="summaryRow"><span>Ausgaben</span><b>-€'+fmt(expenses)+'</b></div>'+
- '<div class="summaryRow"><span>Miete</span><b>-€'+fmt(rent)+'</b></div>'+
- '<div class="summaryRow"><span>Schuldentilgung</span><b>-€'+fmt(debtPay)+'</b></div>'+
- '<div class="summaryTotal"><span>Gewinn</span><b>€'+fmt(Math.max(0,profit-rent-debtPay))+'</b></div>';
- $('shiftPanel').classList.remove('hidden');
-}
-function finishShift(){
- const gross=hero.shiftRevenue,expenses=hero.shiftExpenses,rent=120+hero.upgrades.shop*35;
- const profit=Math.max(0,gross-expenses-rent),pay=Math.min(hero.debt,Math.floor(Math.max(0,profit)*.2));
- hero.money=Math.max(0,hero.money-rent-pay);hero.debt=Math.max(0,hero.debt-pay);hero.day++;
- send('business',{action:'day'});
- hero.revenueToday=0;hero.expensesToday=0;hero.shiftRevenue=0;hero.shiftExpenses=0;
- hero.cleanliness=Math.max(65,hero.cleanliness-8+hero.staff.cleaner*4);
- if(hero.staff.cleaner===0)hero.cleanliness-=5;
- hero.rating=Math.max(1,Math.min(5,hero.rating+(hero.cleanliness>75?.08:-.12)));
- $('shiftPanel').classList.add('hidden');toast('🌙 SCHICHT '+hero.day+' STARTET');makeOrder();ui();
-}
 function performStaff(dt){
  if(hero.staff.cleaner>0)hero.cleanliness=Math.min(100,hero.cleanliness+dt*.4*hero.staff.cleaner);
  if(hero.staff.kitchen>0&&order&&Math.random()<dt*.035*hero.staff.kitchen){
@@ -374,8 +397,13 @@ function move(dt){
  let y=(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0);
  if(joy.on){x=joy.x;y=joy.y}
  const l=Math.hypot(x,y)||1;
- if(x||y){hero.x+=x/l*hero.speed*dt;hero.y+=y/l*hero.speed*dt}
- hero.x=Math.max(170,Math.min(1310,hero.x));hero.y=Math.max(120,Math.min(770,hero.y));
+ if(x||y){
+  const nx=hero.x+x/l*hero.speed*dt;
+  const ny=hero.y+y/l*hero.speed*dt;
+  if(!hitsStationBody(nx,hero.y))hero.x=nx;
+  if(!hitsStationBody(hero.x,ny))hero.y=ny;
+ }
+ hero.x=Math.max(300,Math.min(1215,hero.x));hero.y=Math.max(120,Math.min(770,hero.y));
 }
 
 function sendInput(){send('input',{x:hero.x,y:hero.y})}
@@ -432,7 +460,7 @@ function drawKitchen(t){
  ctx.fillStyle='#111614';rr(410,102,680,48,12);ctx.fillStyle='#ffb52f';ctx.shadowBlur=22;ctx.shadowColor='#ff9e28';ctx.fillRect(640,116,220,5);ctx.shadowBlur=0;
  txt('BURGER SIMULATOR',750,137,20,'#ffd477');
  for(let i=0;i<7;i++){const sx=460+i*98;ctx.fillStyle=i%2?'#ffbe49':'#f9e1a5';ctx.globalAlpha=.25+.15*pulse;ctx.beginPath();ctx.arc(sx,91,4,0,7);ctx.fill();ctx.globalAlpha=1}
- drawFridge();drawCounter();drawStations(t);drawQueue(t);
+ drawFridge();drawCounter();drawStations(t);drawInteractionPads();drawQueue(t);
 }
 function drawFridge(){
  ctx.fillStyle='#dae3df';rr(325,210,70,390,10);ctx.fillStyle='#b4c4bf';rr(334,222,52,115,7);rr(334,350,52,238,7);
@@ -445,13 +473,30 @@ function drawCounter(){
  ctx.fillStyle='#33261d';rr(1212,425,106,65,9);
  for(let i=0;i<5;i++){ctx.fillStyle='#b89057';ctx.fillRect(1222+i*18,440,13,40)}
 }
+function drawInteractionPads(){
+ for(const [k,p] of Object.entries(interactionPad)){
+  const near=getNearestStation()===k;
+  shadow(p.x,p.y+28,48,8,.24);
+  ctx.save();
+  ctx.fillStyle=near?'#d9dcda':'#c8cbc9';
+  rr(p.x-p.w/2,p.y-p.h/2,p.w,p.h,10);
+  ctx.strokeStyle=near?'#fff3':'#9b9f9d';
+  ctx.lineWidth=3;
+  ctx.stroke();
+  ctx.fillStyle='#3a3e3c';
+  ctx.globalAlpha=near?.9:.55;
+  txt('✋',p.x,p.y+7,18,'#303431');
+  ctx.restore();
+ }
+}
+
 function drawStations(t){
  const near=getNearestStation();
  for(const [k,p] of Object.entries(station)){
   const s=station[k];shadow(p.x,p.y+45,58,14,.32);ctx.fillStyle='#1e2622';rr(p.x-52,p.y-39,104,78,14);
   ctx.fillStyle=s.color;rr(p.x-43,p.y-31,86,62,10);ctx.fillStyle='#fff9';rr(p.x-30,p.y-21,60,10,5);
   ctx.fillStyle='#0b110e';ctx.fillRect(p.x-31,p.y+6,62,19);txt(s.emoji,p.x,p.y+18,23);txt(s.label,p.x,p.y+58,10,'#f7f7ef');
-  if(k===near){ctx.strokeStyle='#ffe07a';ctx.lineWidth=3;ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(p.x,p.y,58+Math.sin(t*.008)*4,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;txt('E',p.x,p.y-51,11,'#ffe07a')}
+  if(k===near){ctx.strokeStyle='#ffe07a';ctx.lineWidth=3;ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(p.x,p.y,58+Math.sin(t*.008)*4,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;txt('✋',p.x,p.y-51,11,'#ffe07a')}
  }
  if(prep.started&&order){
   const s=order.steps[order.stepIndex],p=station[s];if(p){
@@ -507,5 +552,11 @@ function loop(t){
 requestAnimationFrame(loop);
 
 function applyBusiness(d){
- if(Number.isFinite(d.money))hero.money=d.money;if(Number.isFinite(d.debt))hero.debt=d.debt;if(Number.isFinite(d.day))hero.day=d.day;ui();
+ if(!d)return;
+ if(Number.isFinite(d.money))hero.money=d.money;
+ if(Number.isFinite(d.debt))hero.debt=d.debt;
+ if(Number.isFinite(d.day))hero.day=d.day;
+ if(typeof d.shopName==='string'&&d.shopName.trim())shopName=d.shopName;
+ if(Number.isFinite(d.dayStartedAt))dayStartedAt=d.dayStartedAt;
+ ui();
 }
