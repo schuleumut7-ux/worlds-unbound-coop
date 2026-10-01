@@ -95,7 +95,7 @@ wss.on('connection',ws=>{
     const amount=Math.max(0,Math.min(40,Number(m.amount)||0));
     const profit=Math.max(0,Math.min(amount,Number(m.profit)||0));
     if(amount<=0)return;
-    room.business.money=Math.min(99999999,room.business.money+profit);
+    room.business.money=Math.min(99999999,room.business.money+amount);
     room.business.debt=Math.max(0,room.business.debt-Math.round(profit*.2*100)/100);
     for(const q of room.players.values()){q.money=room.business.money;q.debt=room.business.debt;q.day=room.business.day}
     broadcast(room,'sale',{amount,profit});broadcast(room,'state',state(room));return;
