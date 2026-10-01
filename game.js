@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id),c=$('game'),ctx=c.getContext('2d');
-let W,H,DPR,mode='menu',ws=null,room='',me='',mobile=localStorage.getItem('bm-mobile')==='1';
+const touchDevice=('ontouchstart' in window)||navigator.maxTouchPoints>0;let savedMobile=localStorage.getItem('bm-mobile');let W,H,DPR,mode='menu',ws=null,room='',me='',mobile=savedMobile===null?touchDevice:savedMobile==='1';
 let last=performance.now(),keys=new Set(),joy={on:false,x:0,y:0},particles=[],floats=[],others=new Map(),activeTouch=null;
 const recipes=[
  {name:'Classic Burger',price:8.5,steps:['bun','grill','assembly'],icons:'🍞 → 🥩 → 🍔',need:{bun:1,patty:1}},
@@ -41,6 +41,7 @@ function shadow(x,y,rx,ry,a=.35){ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#00
 function txt(t,x,y,s=12,col='#fff',align='center'){ctx.save();ctx.font=`800 ${s}px Inter,system-ui,sans-serif`;ctx.fillStyle=col;ctx.textAlign=align;ctx.fillText(t,x,y);ctx.restore()}
 function addFloat(t,x,y,col='#8ff0aa'){floats.push({t,x,y,life:1,col})}
 function burst(x,y,n=12,col='#ffbd43'){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*150,vy:(Math.random()-.5)*150,life:.5+Math.random()*.7,r:2+Math.random()*4,col})}
+function updateMobileStart(){const el=$('mobileStartState');if(el)el.textContent=mobile?'AN':'AUS'}
 function ui(){
  $('money').textContent=Math.floor(hero.money).toLocaleString('de-DE');
  $('debt').textContent=Math.max(0,Math.floor(hero.debt)).toLocaleString('de-DE');
@@ -48,7 +49,7 @@ function ui(){
  $('orderName').textContent=order?order.name:'Keine Bestellung';$('recipeLine').textContent=order?order.icons:'Warte auf Kunden…';
  $('orderTimer').textContent=order?Math.max(0,Math.ceil(order.timer))+'s':'—';$('orderHint').textContent=order?stepHint():'Neue Gäste kommen gleich.';
  const done=order?Math.min(1,order.stepIndex/order.steps.length):0;$('orderProgress').style.width=(done*100)+'%';
- document.body.classList.toggle('mobileOn',mobile);if($('mobileToggle'))$('mobileToggle').checked=mobile;
+ document.body.classList.toggle('mobileOn',mobile);if($('mobileToggle'))$('mobileToggle').checked=mobile;updateMobileStart();
 }
 function stepHint(){if(!order)return '';const s=order.steps[order.stepIndex];return s==='cash'?'Geld annehmen und korrekt Rückgeld geben.':`Station: ${station[s].label} — E drücken`}
 function makeOrder(){const base=recipes[Math.floor(Math.random()*recipes.length)];order={...base,steps:[...base.steps],stepIndex:0,timer:42+Math.max(0,hero.day-1)*1.5};prep={step:-1,readyAt:0,overAt:0,started:false};ui()}
@@ -65,7 +66,7 @@ $('create').onclick=()=>connect('create');$('joinOpen').onclick=()=>{$('menu').c
 $('join').onclick=()=>connect('join',$('code').value.trim().toUpperCase());$('back').onclick=()=>{$('join').classList.add('hidden');$('menu').classList.remove('hidden')};
 $('how').onclick=()=>$('storyPanel').classList.remove('hidden');$('storyClose').onclick=()=>$('storyPanel').classList.add('hidden');
 $('settings').onclick=()=>$('settingsPanel').classList.remove('hidden');$('settingsClose').onclick=()=>$('settingsPanel').classList.add('hidden');
-$('mobileToggle').onchange=e=>{mobile=e.target.checked;localStorage.setItem('bm-mobile',mobile?'1':'0');ui();toast(mobile?'Mobile Steuerung AN':'Mobile Steuerung AUS')};
+$('mobileToggle').onchange=e=>{mobile=e.target.checked;localStorage.setItem('bm-mobile',mobile?'1':'0');ui();toast(mobile?'Mobile Steuerung AN':'Mobile Steuerung AUS')};$('mobileStartToggle').onclick=()=>{mobile=!mobile;localStorage.setItem('bm-mobile',mobile?'1':'0');$('mobileStartState').textContent=mobile?'AN':'AUS';ui();toast(mobile?'📱 Mobile Steuerung AN':'📱 Mobile Steuerung AUS')};
 $('load').onclick=()=>$('savePanel').classList.remove('hidden');$('saveClose').onclick=()=>$('savePanel').classList.add('hidden');
 $('inventoryBtn').onclick=()=>{$('inventoryPanel').classList.remove('hidden');renderInventory()};$('inventoryClose').onclick=()=>$('inventoryPanel').classList.add('hidden');
 $('shopBtn').onclick=()=>{$('shopPanel').classList.remove('hidden');renderShop()};$('shopClose').onclick=()=>$('shopPanel').classList.add('hidden');
@@ -73,7 +74,7 @@ $('staffBtn').onclick=()=>{$('staffPanel').classList.remove('hidden');renderStaf
 $('shiftBtn').onclick=openShift; $('shiftCancel').onclick=()=>$('shiftPanel').classList.add('hidden');
 $('shiftConfirm').onclick=finishShift;
 function getSave(){return JSON.parse(localStorage.getItem('bm-last-save')||'null')}
-function payload(){return JSON.parse(JSON.stringify({hero,order,worldVersion:'Burger Mafia V3.0 CO-OP',roomLast:room}))}
+function payload(){return JSON.parse(JSON.stringify({hero,order,worldVersion:'Burger Mafia V2.1 CO-OP',roomLast:room}))}
 function save(slot){
  const code=String(1000+Math.floor(Math.random()*9000));const data=payload();data.saveCode=code;data.savedAt=new Date().toISOString();
  localStorage.setItem('bm-slot-'+slot,JSON.stringify(data));localStorage.setItem('bm-code-'+code,JSON.stringify(data));localStorage.setItem('bm-last-save',JSON.stringify(data));
