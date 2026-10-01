@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Burger Mafia — V2.1 CO-OP</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -15,36 +15,43 @@
     <h1>BURGER<br><span>MAFIA</span></h1>
     <p class="lead">Baut euren Burgerladen auf. Liefert Schichten ab. Zahlt die €1.000.000 zurück.</p>
     <input id="name" maxlength="16" value="Hero" placeholder="Euer Name">
-    <div class="row"><button id="create">🍔 LADEN ERSTELLEN</button><button id="joinOpen">🤝 CO-OP BEITRETEN</button></div>
-    <button id="load">💾 SAVE SLOTS</button>
-    <button id="how">📖 STORY & SO SPIELT MAN</button><button id="mobileStartToggle">📱 MOBILE STEUERUNG: <span id="mobileStartState">AN</span></button>
-    <div class="miniStats"><span>🧑‍🤝‍🧑 2 Spieler</span><span>💶 €1.000.000 Schulden</span><span>💾 Codes</span></div>
+    <div class="row">
+      <button id="create">🍔 LADEN ERSTELLEN</button>
+      <button id="joinOpen">🤝 CO-OP BEITRETEN</button>
+    </div>
+    <button id="load" class="mobileStartToggle" aria-hidden="true">💾 SAVE SLOTS</button>
+    <button id="how">📖 STORY & SO SPIELT MAN</button>
+    <button id="mobileStartToggle" class="mobileStartToggle" aria-hidden="true">📱 MOBILE STEUERUNG: <span id="mobileStartState">AN</span></button>
+    <div class="miniStats"><span>🧑‍🤝‍🧑 2 Spieler</span><span>💶 €1.000.000 Schulden</span><span>⚡ Echtzeit CO-OP</span></div>
   </div>
 </div>
 
 <div id="join" class="screen hidden">
   <div class="card">
-    <div class="tag">CO-OP</div><h2>ROOM BEITRETEN</h2>
+    <div class="tag">CO-OP</div>
+    <h2>ROOM BEITRETEN</h2>
     <p>Gebt den 5-stelligen Raumcode des Hosts ein.</p>
-    <input id="code" maxlength="5" placeholder="X7K4P" class="codeInput">
-    <button id="join">JOIN ROOM</button><button id="back" class="ghost">ZURÜCK</button>
+    <input id="code" maxlength="5" placeholder="X7K4P" class="codeInput" autocomplete="off" spellcheck="false">
+    <button id="joinRoomBtn">🤝 ROOM STARTEN</button>
+    <button id="back" class="ghost">ZURÜCK</button>
   </div>
 </div>
 
 <div id="hud" class="hidden">
   <header>
     <div class="brand">🍔 <b>BURGER MAFIA</b><small id="shiftLabel">SCHICHT 1</small></div>
+    <div class="roomChip">ROOM <strong id="room">—</strong><i id="connectionDot"></i></div>
     <div class="moneyChip">💰 <strong id="money">500</strong>€</div>
     <div class="debtChip">📉 <strong id="debt">1.000.000</strong>€</div>
     <div class="statChip">⭐ LV <strong id="level">1</strong></div>
     <div class="statChip">👥 <strong id="playerCount">1/2</strong></div>
-    <button id="settings">⚙️</button>
+    <button id="settings" aria-label="Einstellungen">⚙️</button>
   </header>
 
   <div class="orderPanel" id="orderPanel">
     <div class="orderTop"><span>🔔 AKTIVE BESTELLUNG</span><b id="orderTimer">40s</b></div>
     <div id="orderName">Classic Burger</div>
-    <div class="recipeLine" id="recipeLine">🍞 Bun → 🥩 Patty → 🧀 Cheese → 🍔 Assembly → 💵 Kasse</div>
+    <div class="recipeLine" id="recipeLine">🍞 Bun → 🥩 Patty → 🍔 Assembly → 💵 Kasse</div>
     <div class="progress"><i id="orderProgress"></i></div>
     <small id="orderHint">Geht zu einer Station und drückt E.</small>
   </div>
@@ -65,12 +72,16 @@
   </div>
 
   <div id="objectiveBar">🎯 Ziel: Verdient Geld und zahlt die Mafia-Schulden zurück.</div>
-  <div class="help">WASD / Pfeile bewegen • E Interagieren • Q neue Bestellung • I Inventar • U Upgrades</div>
+  <div class="help">WASD / Pfeile bewegen • E Interagieren • Q Bestellung • I Inventar • U Shop</div>
   <div id="toast"></div>
 
   <div id="mobile">
-    <div id="joy"><i></i></div>
-    <div id="actions"><button id="mInteract">E</button><button id="mCash">💶</button><button id="mRecipe">Q</button></div>
+    <div id="joy" aria-label="Bewegungsjoystick"><i></i></div>
+    <div id="actions">
+      <button id="mInteract" aria-label="Interagieren">E</button>
+      <button id="mCash" aria-label="Kasse">💶</button>
+      <button id="mRecipe" aria-label="Neue Bestellung">Q</button>
+    </div>
   </div>
 
   <div id="cashPanel" class="modal hidden">
@@ -80,7 +91,7 @@
     <div class="cashCustomer"><span>Kunde gibt</span><strong id="cashGiven">€0,00</strong></div>
     <div class="changeBox"><span>Rückgeld</span><strong id="cashChange">€0,00</strong></div>
     <label class="cashLabel">Erhaltenes Geld
-      <input id="cashInput" inputmode="decimal" placeholder="z.B. 20">
+      <input id="cashInput" inputmode="decimal" autocomplete="off" placeholder="z.B. 20">
     </label>
     <div class="cashQuick"><button data-cash="exact">PASSEND</button><button data-cash="20">20€</button><button data-cash="50">50€</button><button data-cash="100">100€</button></div>
     <button id="cashAccept">✅ GELD NEHMEN & RÜCKGELD GEBEN</button>
@@ -107,39 +118,27 @@
     <button id="staffClose" class="ghost">SCHLIESSEN</button>
   </div>
 
-  <div id="savePanel" class="modal hidden">
-    <div class="modalTag">💾 SPEICHERN</div><h2>SAVE SLOTS</h2>
-    <p>Jeder Slot bekommt einen 4-stelligen Code. Damit könnt ihr euren letzten gespeicherten Stand wieder laden.</p>
-    <div class="slots">
-      <button data-slot="1">SLOT 1</button><button data-slot="2">SLOT 2</button><button data-slot="3">SLOT 3</button>
-    </div>
-    <div class="savedCode" id="saveCode">Noch kein Code</div>
-    <input id="loadCode" maxlength="4" inputmode="numeric" placeholder="Save-Code z.B. 2846">
-    <button id="loadByCode">🔑 SAVE-CODE LADEN</button>
-    <button id="saveClose" class="ghost">SCHLIESSEN</button>
-  </div>
-
   <div id="settingsPanel" class="modal hidden">
     <div class="modalTag">⚙️ OPTIONEN</div><h2>EINSTELLUNGEN</h2>
     <label class="toggleRow">Mobile Steuerung <input id="mobileToggle" type="checkbox"></label>
-    <p>Joystick links sowie Aktionsbuttons rechts.</p>
+    <p>Der Joystick bleibt aktiv auf Touch-Geräten und lässt sich hier komplett an- oder ausschalten.</p>
     <button id="settingsClose" class="ghost">ZURÜCK</button>
-  </div>
-
-  <div id="storyPanel" class="modal hidden">
-    <div class="modalTag">📖 DIE SCHULD</div><h2>€1.000.000 SCHULDEN</h2>
-    <p><b>Ihr habt der Mafia €1.000.000 geschuldet.</b></p>
-    <p>Eure letzte Chance: Führt euren Burgerladen. Nehmt Bestellungen an. Kocht sauber. Nehmt Geld an. Gebt korrekt Rückgeld. Investiert den Gewinn und baut weitere Filialen.</p>
-    <p>Jede neue Schicht wird schneller und schwieriger. Eure Entscheidungen verändern euren Laden.</p>
-    <button id="storyClose">✅ OK — LOS GEHT'S</button>
   </div>
 
   <div id="shiftPanel" class="modal hidden">
     <div class="modalTag">🌙 TAGESABSCHLUSS</div><h2>SCHICHT BEENDEN</h2>
     <div id="shiftSummary"></div>
-    <button id="shiftConfirm">✅ ABSCHLUSS & SPEICHERN</button>
+    <button id="shiftConfirm">✅ ABSCHLUSS & WEITER</button>
     <button id="shiftCancel" class="ghost">WEITERARBEITEN</button>
   </div>
+</div>
+
+<div id="storyPanel" class="modal hidden">
+  <div class="modalTag">📖 DIE SCHULD</div><h2>€1.000.000 SCHULDEN</h2>
+  <p><b>Ihr habt der Mafia €1.000.000 geschuldet.</b></p>
+  <p>Eure letzte Chance: Führt euren Burgerladen. Nehmt Bestellungen an. Kocht sauber. Nehmt Geld an. Gebt korrekt Rückgeld. Investiert den Gewinn und baut euren Laden aus.</p>
+  <p>Jede neue Schicht wird schneller und schwieriger. Gute Zusammenarbeit spart Zeit und Geld.</p>
+  <button id="storyClose">✅ OK — LOS GEHT'S</button>
 </div>
 
 <script src="game.js"></script>
