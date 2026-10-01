@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id),c=$('game'),ctx=c.getContext('2d');
-const touchDevice=('ontouchstart' in window)||navigator.maxTouchPoints>0;let savedMobile=localStorage.getItem('bm-mobile');let W,H,DPR,mode='menu',ws=null,room='',me='',mobile=savedMobile===null?touchDevice:savedMobile==='1';
+const touchDevice=('ontouchstart' in window)||navigator.maxTouchPoints>0;let savedMobile=localStorage.getItem('bm-mobile');let W,H,DPR,mode='menu',ws=null,room='',me='',mobile=touchDevice?true:(savedMobile==='1');
 let last=performance.now(),keys=new Set(),joy={on:false,x:0,y:0},particles=[],floats=[],others=new Map(),activeTouch=null;
 const recipes=[
  {name:'Classic Burger',price:8.5,steps:['bun','grill','assembly'],icons:'🍞 → 🥩 → 🍔',need:{bun:1,patty:1}},
@@ -55,14 +55,14 @@ function stepHint(){if(!order)return '';const s=order.steps[order.stepIndex];ret
 function makeOrder(){const base=recipes[Math.floor(Math.random()*recipes.length)];order={...base,steps:[...base.steps],stepIndex:0,timer:42+Math.max(0,hero.day-1)*1.5};prep={step:-1,readyAt:0,overAt:0,started:false};ui()}
 function startGame(showStory=true){mode='game';$('menu').classList.add('hidden');$('join').classList.add('hidden');$('hud').classList.remove('hidden');if(!order)makeOrder();ui();if(showStory)setTimeout(()=>$('storyPanel').classList.remove('hidden'),150)}
 function connect(type,code){const proto=location.protocol==='https:'?'wss':'ws';ws=new WebSocket(`${proto}://${location.host}`);ws.onopen=()=>ws.send(JSON.stringify({type,name:($('name').value||'Hero').slice(0,16),code}));ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}
- if(m.type==='roomCreated'||m.type==='joined'){room=m.code;me=m.id;startGame(true);toast(m.type==='roomCreated'?`Room ${room} erstellt`:'CO-OP verbunden')}
+ if(m.type==='roomCreated'||m.type==='joined'){room=m.code;me=m.id;if(mode!=='game')startGame(false);toast(m.type==='roomCreated'?`Room ${room} erstellt`:'CO-OP verbunden')}
  if(m.type==='state'){room=m.code||room;for(const p of m.players||[]){if(p.id===me){hero.x=p.x;hero.y=p.y;if(Number.isFinite(p.money))hero.money=p.money;if(Number.isFinite(p.debt))hero.debt=p.debt;hero.day=p.day||hero.day}else others.set(p.id,p)}}
  if(m.type==='business'){applyBusiness(m.data||{})}
  if(m.type==='sale'){toast('💵 CO-OP Verkauf: '+fmt(m.amount)+' €');burst(hero.x,hero.y,18)}
  if(m.type==='error')toast(m.message)
 };ws.onclose=()=>toast('Server getrennt')}
 function send(type,data={}){if(ws?.readyState===1)ws.send(JSON.stringify({type,...data}))}
-$('create').onclick=()=>connect('create');$('joinOpen').onclick=()=>{$('menu').classList.add('hidden');$('join').classList.remove('hidden')};
+$('create').onclick=()=>{startGame(true);connect('create')};$('joinOpen').onclick=()=>{$('menu').classList.add('hidden');$('join').classList.remove('hidden')};
 $('join').onclick=()=>connect('join',$('code').value.trim().toUpperCase());$('back').onclick=()=>{$('join').classList.add('hidden');$('menu').classList.remove('hidden')};
 $('how').onclick=()=>$('storyPanel').classList.remove('hidden');$('storyClose').onclick=()=>$('storyPanel').classList.add('hidden');
 $('settings').onclick=()=>$('settingsPanel').classList.remove('hidden');$('settingsClose').onclick=()=>$('settingsPanel').classList.add('hidden');
@@ -198,7 +198,12 @@ function drawWorld(t){ctx.clearRect(0,0,W,H);if(mode!=='game'){ctx.fillStyle='#0
  for(const p of particles){p.x+=p.vx*.016;p.y+=p.vy*.016;p.life-=.016;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(W/2+(p.x-hero.x),H/2+(p.y-hero.y),p.r,0,7);ctx.fill()}ctx.globalAlpha=1;
 }
 function loop(t){const dt=Math.min(.04,(t-last)/1000);last=t;if(mode==='game'&&!cash.open&&!document.querySelector('.modal:not(.hidden)')){move(dt);if(order){order.timer-=dt;if(order.timer<=0){hero.missed++;hero.money=Math.max(0,hero.money-10);hero.rating=Math.max(1,hero.rating-.08);toast('😡 Kunde geht — Bestellung verpasst');makeOrder()}}performStaff(dt);autoSaveTimer+=dt;if(autoSaveTimer>12){autoSaveTimer=0;saveAuto()}if(ws&&t-(loop.net||0)>120){loop.net=t;sendInput()}ui()}drawWorld(t);requestAnimationFrame(loop)}requestAnimationFrame(loop);
-$('joy').addEventListener('pointerdown',e=>{activeTouch=e.pointerId;joy.on=true;joyMove(e);$('joy').setPointerCapture?.(e.pointerId)});addEventListener('pointermove',e=>{if(e.pointerId===activeTouch)joyMove(e)});addEventListener('pointerup',e=>{if(e.pointerId===activeTouch){activeTouch=null;joy.on=false;joy.x=joy.y=0;$('joy').querySelector('i').style.transform='translate(-50%,-50%)'}});
-function joyMove(e){const r=$('joy').getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=48,l=Math.hypot(dx,dy)||1,k=Math.min(1,max/l);joy.x=dx/l*k;joy.y=dy/l*k;$('joy').querySelector('i').style.transform=`translate(calc(-50% + ${dx/l*k*48}px),calc(-50% + ${dy/l*k*48}px))`}
-$('mInteract').onclick=tryInteract;$('mRecipe').onclick=makeOrder;
+function resetJoy(){activeTouch=null;joy.on=false;joy.x=0;joy.y=0;const k=$('joy')?.querySelector('i');if(k)k.style.transform='translate(-50%,-50%)'}
+function joyMove(e){const r=$('joy').getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=Math.min(50,r.width*.36),l=Math.hypot(dx,dy)||1,k=Math.min(1,max/l);joy.x=dx/l*k;joy.y=dy/l*k;$('joy').querySelector('i').style.transform=`translate(calc(-50% + ${dx/l*k*48}px),calc(-50% + ${dy/l*k*48}px))`}
+$('joy').addEventListener('pointerdown',e=>{e.preventDefault();activeTouch=e.pointerId;joy.on=true;$('joy').setPointerCapture?.(e.pointerId);joyMove(e)});
+$('joy').addEventListener('pointermove',e=>{if(e.pointerId===activeTouch){e.preventDefault();joyMove(e)}});
+$('joy').addEventListener('pointerup',e=>{if(e.pointerId===activeTouch)resetJoy()});
+$('joy').addEventListener('pointercancel',resetJoy);$('joy').addEventListener('lostpointercapture',resetJoy);
+addEventListener('pointerup',e=>{if(e.pointerId===activeTouch)resetJoy()});addEventListener('blur',resetJoy);
+$('mInteract').onclick=tryInteract;$('mCash').onclick=()=>{if(order&&order.stepIndex>=order.steps.length)openCash();else tryInteract()};$('mRecipe').onclick=makeOrder;['mInteract','mCash','mRecipe'].forEach(id=>$(id).addEventListener('touchstart',e=>e.preventDefault(),{passive:false}));
 function applyBusiness(d){if(Number.isFinite(d.money))hero.money=d.money;if(Number.isFinite(d.debt))hero.debt=d.debt;if(Number.isFinite(d.day))hero.day=d.day;ui()}
