@@ -338,8 +338,13 @@ function prepDone(msg){
 }
 function getNearestStation(){
  let near=null;
+ let bestScore=Infinity;
  for(const [k,pad] of Object.entries(interactionPad)){
-  if(insidePad(pad,hero.x,hero.y,7)){near=k;break}
+  const cx=pad.x,cy=pad.y;
+  const inside=insidePad(pad,hero.x,hero.y,7);
+  if(!inside)continue;
+  const score=Math.hypot(hero.x-cx,hero.y-cy);
+  if(score<bestScore){bestScore=score;near=k}
  }
  return near;
 }
@@ -546,7 +551,9 @@ function drawCounter(){
 }
 function drawInteractionPads(t){
  const emoji={bun:'🍞',grill:'🥩',cheese:'🧀',assembly:'🍔',fryer:'🍟',cash:'💶'};
+ const active=getNearestStation();
  for(const [k,p] of Object.entries(interactionPad)){
+  const near=k===active;
   const near=getNearestStation()===k;
   const pulse=.5+.5*Math.sin(t*.006+(p.x%80)*.02);
   ctx.save();
@@ -580,8 +587,9 @@ function drawInteractionPads(t){
 }
 
 function drawStations(t){
- const near=getNearestStation();
+ const active=getNearestStation();
  for(const [k,p] of Object.entries(station)){
+  const near=k===active;
   const s=station[k];
   const bob=Math.sin(t*.0032+p.x*.015)*1.15;
   const glow=.5+.5*Math.sin(t*.004+p.x*.008);
@@ -616,26 +624,28 @@ function drawStations(t){
    ctx.beginPath();ctx.arc(p.x,p.y,59+glow*4,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
   }
 
-  if(k==='grill'){
-   for(let i=0;i<3;i++){
-    const fx=p.x-18+i*18,fy=p.y+5+Math.sin(t*.01+i)*1.5;
-    ctx.globalAlpha=.48+.2*glow;txt('🔥',fx,fy,12+Math.sin(t*.014+i)*1.5,'#fff');
+  if(near){
+   if(k==='grill'){
+    for(let i=0;i<3;i++){
+     const fx=p.x-18+i*18,fy=p.y+5+Math.sin(t*.01+i)*1.5;
+     ctx.globalAlpha=.48+.2*glow;txt('🔥',fx,fy,12+Math.sin(t*.014+i)*1.5,'#fff');
+    }
    }
-  }
-  if(k==='fryer'){
-   const wob=Math.sin(t*.009)*2.5;ctx.globalAlpha=.7;
-   txt('✨',p.x-18,p.y-1+wob,10,'#ffe9a4');txt('✨',p.x+20,p.y+5-wob,9,'#ffe9a4');ctx.globalAlpha=1;
-  }
-  if(k==='cheese'){
-   const cg=.5+.5*Math.sin(t*.006);ctx.globalAlpha=.22+.22*cg;ctx.fillStyle='#ffd760';
-   ctx.shadowBlur=20;ctx.shadowColor='#ffd760';ctx.beginPath();ctx.arc(p.x,p.y+14,17+cg*2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;
-  }
-  if(k==='bun'){
-   const b=.5+.5*Math.sin(t*.005);ctx.globalAlpha=.25+.2*b;ctx.fillStyle='#f4c67b';ctx.beginPath();ctx.arc(p.x,p.y+18,18+b*2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
-  }
-  if(k==='assembly'){
-   const a=.5+.5*Math.sin(t*.004);ctx.globalAlpha=.25+.2*a;ctx.strokeStyle='#ffe49a';ctx.lineWidth=2;
-   ctx.beginPath();ctx.arc(p.x,p.y+18,20+a*2,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+   if(k==='fryer'){
+    const wob=Math.sin(t*.009)*2.5;ctx.globalAlpha=.7;
+    txt('✨',p.x-18,p.y-1+wob,10,'#ffe9a4');txt('✨',p.x+20,p.y+5-wob,9,'#ffe9a4');ctx.globalAlpha=1;
+   }
+   if(k==='cheese'){
+    const cg=.5+.5*Math.sin(t*.006);ctx.globalAlpha=.22+.22*cg;ctx.fillStyle='#ffd760';
+    ctx.shadowBlur=20;ctx.shadowColor='#ffd760';ctx.beginPath();ctx.arc(p.x,p.y+14,17+cg*2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;
+   }
+   if(k==='bun'){
+    const b=.5+.5*Math.sin(t*.005);ctx.globalAlpha=.25+.2*b;ctx.fillStyle='#f4c67b';ctx.beginPath();ctx.arc(p.x,p.y+18,18+b*2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+   }
+   if(k==='assembly'){
+    const a=.5+.5*Math.sin(t*.004);ctx.globalAlpha=.25+.2*a;ctx.strokeStyle='#ffe49a';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(p.x,p.y+18,20+a*2,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+   }
   }
 
   if(prep.started&&order){
