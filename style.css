@@ -67,3 +67,15 @@
  .tutorialHeader b{font-size:12px}
  .tutorialInfo strong{font-size:13px}
  .tutorialInfo span:not(.tutorialStep){font-size:9px}}
+
+.tutorialInfo{
+  background:linear-gradient(145deg,#111916f4,#080c0be8)!important;
+  color:#eef2ee!important;
+  border:1px solid #ffffff16!important;
+  box-shadow:0 18px 52px #000a,inset 0 1px #ffffff0b!important;
+  backdrop-filter:blur(18px);
+}
+.tutorialHeader b{color:#ffd477!important}
+.tutorialStep{background:#ffffff08!important;color:#ffd477!important;border:1px solid #ffffff12!important}
+.tutorialInfo strong{color:#f3f6f3!important}
+.tutorialInfo span:not(.tutorialStep){color:#9ca59f!important}
