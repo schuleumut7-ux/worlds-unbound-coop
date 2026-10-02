@@ -19,6 +19,7 @@
       <button id="create">🍔 LADEN ERSTELLEN</button>
       <button id="joinOpen">🤝 CO-OP BEITRETEN</button>
     </div>
+    <button id="loadSaveOpen">💾 SPIEL LADEN</button>
     <button id="how">📖 STORY & SO SPIELT MAN</button>
     <button id="mobileStartToggle" class="mobileStartToggle" aria-hidden="true">📱 MOBILE STEUERUNG: <span id="mobileStartState">AN</span></button>
     <div class="miniStats"><span>🧑‍🤝‍🧑 2 Spieler</span><span>💶 €1.000.000 Schulden</span><span>⚡ Echtzeit CO-OP</span></div>
@@ -33,6 +34,20 @@
     <input id="code" maxlength="5" placeholder="X7K4P" class="codeInput" autocomplete="off" spellcheck="false">
     <button id="joinRoomBtn">🤝 ROOM STARTEN</button>
     <button id="back" class="ghost">ZURÜCK</button>
+  </div>
+</div>
+
+<div id="loadSave" class="screen hidden">
+  <div class="card">
+    <div class="tag">💾 SAVE FILES</div>
+    <h2>SPIEL LADEN</h2>
+    <p>Wähle einen gespeicherten Laden oder gib deinen Save-Code ein.</p>
+    <div id="startSaveList" class="saveList startSaveList"></div>
+    <div class="saveCodeStart">
+      <input id="saveCodeInput" maxlength="8" placeholder="8-STELLIGER SAVE-CODE" class="codeInput" autocomplete="off" spellcheck="false">
+      <button id="loadSaveCodeBtn">🔓 MIT SAVE-CODE LADEN</button>
+    </div>
+    <button id="loadSaveBack" class="ghost">ZURÜCK</button>
   </div>
 </div>
 
@@ -121,9 +136,38 @@
     <button id="saveShopName">✅ LADENNAME SPEICHERN</button>
     <p>Der Ladenname wird für beide Spieler im aktuellen Raum übernommen.</p>
     <p>Der Joystick bleibt aktiv auf Touch-Geräten und lässt sich hier komplett an- oder ausschalten.</p>
+    <button id="saveGameOpen">💾 SPIEL SPEICHERN</button>
+    <p id="saveHostHint" class="saveHostHint">Nur der Host kann den Spielstand speichern.</p>
     <button id="settingsClose" class="ghost">ZURÜCK</button>
   </div>
 
+  <div id="savePanel" class="modal hidden">
+    <button id="saveCloseX" class="modalCloseX" aria-label="Speicherfenster schließen">×</button>
+    <div class="modalTag">💾 SAVE FILES</div><h2>SPIEL SPEICHERN</h2>
+    <p id="savePanelHint">Wähle einen der 3 Speicherplätze.</p>
+    <div id="saveList" class="saveList"></div>
+    <button id="saveClose" class="ghost">ZURÜCK</button>
+  </div>
+
+  <div id="saveResultPanel" class="modal hidden">
+    <div class="modalTag">✅ SPEICHERPUNKT ERSTELLT</div>
+    <h2>SPIEL GESPEICHERT</h2>
+    <p id="saveResultSlot"></p>
+    <div class="saveCodeBox">
+      <span>SAVE-CODE</span>
+      <strong id="saveResultCode">--------</strong>
+    </div>
+    <button id="saveContinue">▶ WEITERSPIELEN</button>
+    <button id="saveLeave" class="ghost">🚪 VERLASSEN</button>
+  </div>
+
+</div>
+
+<div id="hostLeftPanel" class="modal hidden">
+  <div class="modalTag">⚠️ CO-OP ENDE</div>
+  <h2>HOST HAT SERVER VERLASSEN</h2>
+  <p>Der Host hat den Server verlassen. Du wurdest aus der Lobby entfernt.</p>
+  <button id="hostLeftOk">OK</button>
 </div>
 
 <div id="storyPanel" class="modal hidden">
