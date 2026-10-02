@@ -554,7 +554,6 @@ function drawInteractionPads(t){
  const active=getNearestStation();
  for(const [k,p] of Object.entries(interactionPad)){
   const near=k===active;
-  const near=getNearestStation()===k;
   const pulse=.5+.5*Math.sin(t*.006+(p.x%80)*.02);
   ctx.save();
   shadow(p.x,p.y+25,p.w*.42,7,.22);
@@ -591,8 +590,8 @@ function drawStations(t){
  for(const [k,p] of Object.entries(station)){
   const near=k===active;
   const s=station[k];
-  const bob=Math.sin(t*.0032+p.x*.015)*1.15;
-  const glow=.5+.5*Math.sin(t*.004+p.x*.008);
+  const bob=near?Math.sin(t*.0032+p.x*.015)*1.15:0;
+  const glow=near?.5+.5*Math.sin(t*.004+p.x*.008):.5;
 
   shadow(p.x,p.y+47,61,14,.4);
   ctx.save();
@@ -612,8 +611,8 @@ function drawStations(t){
   ctx.strokeStyle='#ffffff18';ctx.strokeRect(p.x-31,p.y+2+bob,62,21);
   txt(s.emoji,p.x,p.y+20+bob,24,'#fff');
 
-  ctx.globalAlpha=.55+.45*glow;
-  ctx.fillStyle=near?'#ffd36a':'#6ed9a7';ctx.shadowBlur=near?17:9;ctx.shadowColor=near?'#ffd36a':'#6ed9a7';
+  ctx.globalAlpha=near?.55+.45*glow:.72;
+  ctx.fillStyle=near?'#ffd36a':'#6ed9a7';ctx.shadowBlur=near?17:0;ctx.shadowColor=near?'#ffd36a':'transparent';
   ctx.beginPath();ctx.arc(p.x+37,p.y-25+bob,3.2,0,Math.PI*2);ctx.fill();
   ctx.shadowBlur=0;ctx.globalAlpha=1;
 
