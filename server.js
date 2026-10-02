@@ -15,7 +15,7 @@ const saveFiles=new Map();
 const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const WORLD_W=1500,WORLD_H=900,SPAWN_X=765,SPAWN_Y=565;
 const DAY_DURATION_MS=300000;
-const DEFAULT_BUSINESS={money:500,debt:1000000,day:1,shopName:'BURGER SIMULATOR',dayStartedAt:Date.now()};
+const DEFAULT_BUSINESS={money:500,debt:1000000,day:1,shopName:'BURGER SIMULATOR'};
 let saveWriteChain=Promise.resolve();
 
 const MIME={
@@ -52,6 +52,7 @@ function state(room){return{
 }}
 function makeRoom(initialBusiness={}){
  const business={...DEFAULT_BUSINESS,...cloneData(initialBusiness)};
+ if(!Number.isFinite(business.dayStartedAt))business.dayStartedAt=Date.now();
  return{code:makeCode(),host:null,players:new Map(),business};
 }
 
