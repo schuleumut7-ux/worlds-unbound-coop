@@ -49,7 +49,7 @@
   </header>
 
   <div class="orderPanel" id="orderPanel">
-    <div class="orderTop"><span>🔔 AKTIVE BESTELLUNG</span><b id="orderTimer">40s</b></div>
+    <div class="orderTop"><span>🔔 AKTIVE BESTELLUNG</span><span class="orderNoLimit">OHNE ZEITLIMIT</span></div>
     <div id="orderName">Classic Burger</div>
     <div class="recipeLine" id="recipeLine">🍞 Bun → 🥩 Patty → 🍔 Assembly → 💵 Kasse</div>
     <div class="progress"><i id="orderProgress"></i></div>
@@ -63,10 +63,9 @@
   </div>
 
   <div id="tutorialInfo" class="tutorialInfo">
-    <b>📖 TUTORIAL INFOS</b>
-    <span>Stell dich auf die grauen Felder vor den Stationen.</span>
-    <span>✋ Dann interagieren.</span>
-    <span>💶 Bezahlen geht nur auf dem grauen Kassenfeld.</span>
+    <div class="tutorialHeader"><b>📖 TUTORIAL</b><span class="tutorialStep">1 / 3</span></div>
+    <strong id="tutorialTitle">Graues Feld benutzen</strong>
+    <span id="tutorialText">Stell dich auf das graue Feld vor der markierten Station.</span>
   </div>
   <div id="objectiveBar">🎯 Ziel: Verdient Geld und zahlt die Mafia-Schulden zurück.</div>
   <div class="help">WASD / Pfeile bewegen • E Interagieren • Q Bestellung • I Inventar • U Shop</div>
