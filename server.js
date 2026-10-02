@@ -10,7 +10,7 @@ const HOST=process.env.HOST||'0.0.0.0';
 const ROOT=fileURLToPath(new URL('.',import.meta.url));
 const rooms=new Map();
 const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-const WORLD_W=1500,WORLD_H=900,SPAWN_X=650,SPAWN_Y=610;
+const WORLD_W=1500,WORLD_H=900,SPAWN_X=765,SPAWN_Y=565;
 const DAY_DURATION_MS=300000;
 
 const MIME={
