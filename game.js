@@ -40,11 +40,16 @@ function circleHitsRect(x,y,r,rect){
  const qy=Math.max(rect.y,Math.min(y,rect.y+rect.h));
  return Math.hypot(x-qx,y-qy)<r;
 }
+const solidObstacles=[
+ {x:325,y:210,w:70,h:390},   // Lager/Kühlschrank
+ {x:1240,y:470,w:115,h:300} // rechter Kassen-Counter
+];
 function hitsStationBody(x,y){
  for(const p of Object.values(station)){
   const rect={x:p.x-56,y:p.y-43,w:112,h:86};
   if(circleHitsRect(x,y,22,rect))return true;
  }
+ for(const rect of solidObstacles)if(circleHitsRect(x,y,22,rect))return true;
  return false;
 }
 
