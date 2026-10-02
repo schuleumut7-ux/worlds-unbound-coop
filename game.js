@@ -249,6 +249,19 @@ $('storyClose').onclick=()=>{
 $('settings').onclick=()=>$('settingsPanel').classList.remove('hidden');
 $('settingsClose').onclick=()=>$('settingsPanel').classList.add('hidden');
 
+function wirePressAnimation(el){
+ if(!el)return;
+ const down=()=>el.classList.add('isPressed');
+ const up=()=>el.classList.remove('isPressed');
+ el.addEventListener('pointerdown',down,{passive:true});
+ el.addEventListener('pointerup',up,{passive:true});
+ el.addEventListener('pointercancel',up,{passive:true});
+ el.addEventListener('pointerleave',up,{passive:true});
+ el.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')el.classList.add('isPressed')});
+ el.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')el.classList.remove('isPressed')});
+}
+wirePressAnimation($('mInteract'));
+
 $('mobileToggle').onchange=e=>{
  mobile=!!e.target.checked;saveMobilePreference(mobile);ui();
  toast(mobile?'📱 MOBILE STEUERUNG AN':'📱 MOBILE STEUERUNG AUS');
@@ -257,21 +270,35 @@ $('mobileStartToggle').onclick=()=>{
  mobile=!mobile;saveMobilePreference(mobile);ui();
  toast(mobile?'📱 MOBILE STEUERUNG AN':'📱 MOBILE STEUERUNG AUS');
 };
-$('saveShopName').onclick=()=>{
+function saveCurrentShopName(showToast=true){
  const v=String($('shopNameInput')?.value||'').replace(/\s+/g,' ').trim().slice(0,24);
- if(!v)return toast('⚠️ Bitte einen Ladenname eingeben.');
+ if(!v){toast('⚠️ Bitte einen Ladenname eingeben.');return false}
  shopName=v;
  send('business',{action:'setShopName',shopName:v});
  ui();
- toast('✅ Ladenname geändert: '+v);
-};
+ if(showToast)toast('✅ Ladenname geändert: '+v);
+ return true;
+}
+$('saveShopName').onclick=()=>saveCurrentShopName(true);
+$('shopNameInput').addEventListener('input',()=>{
+ const raw=String($('shopNameInput').value||'').replace(/\s+/g,' ').slice(0,24);
+ if($('shopNameInput').value!==raw)$('shopNameInput').value=raw;
+ shopName=raw.trim()||'BURGER SIMULATOR';
+ setText('shopNameLabel',shopName);
+});
+$('shopNameInput').addEventListener('keydown',e=>{
+ if(e.key==='Enter'){
+  e.preventDefault();
+  saveCurrentShopName(true);
+ }
+});
 
 $('inventoryBtn').onclick=()=>{$('inventoryPanel').classList.remove('hidden');renderInventory()};
-$('inventoryClose').onclick=()=>$('inventoryPanel').classList.add('hidden');
+$('inventoryCloseX').onclick=()=>$('inventoryPanel').classList.add('hidden');
 $('shopBtn').onclick=()=>{$('shopPanel').classList.remove('hidden');renderShop()};
-$('shopClose').onclick=()=>$('shopPanel').classList.add('hidden');
+$('shopCloseX').onclick=()=>$('shopPanel').classList.add('hidden');
 $('staffBtn').onclick=()=>{$('staffPanel').classList.remove('hidden');renderStaff()};
-$('staffClose').onclick=()=>$('staffPanel').classList.add('hidden');
+$('staffCloseX').onclick=()=>$('staffPanel').classList.add('hidden');
 
 
 function renderInventory(){
@@ -507,7 +534,7 @@ function drawKitchen(t){
  const signGlow=ctx.createLinearGradient(620,115,880,120);
  signGlow.addColorStop(0,'#ff9f22');signGlow.addColorStop(.5,'#ffe290');signGlow.addColorStop(1,'#ff9f22');
  ctx.fillStyle=signGlow;ctx.shadowBlur=22+lampPulse*10;ctx.shadowColor='#ff9e28';ctx.fillRect(620,115,260,5);ctx.shadowBlur=0;
- txt('BURGER SIMULATOR',750,137,20,'#ffd477');
+ txt(shopName,750,137,20,'#ffd477');
  for(let i=0;i<7;i++){
   const sx=460+i*98;
   ctx.globalAlpha=.25+.18*lampPulse;
