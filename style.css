@@ -16,15 +16,7 @@
   #settings{order:7}
 }
 
-/* --- Burger Simulator screenshot polish --- */
-.orderNoLimit{
-  color:#8ff0aa;
-  font-size:9px;
-  letter-spacing:.08em;
-  font-weight:1000;
-  opacity:.95;
-}
-.tutorialInfo{
+/* --- Burger Simulator screenshot polish --- */.tutorialInfo{
   position:fixed;
   left:14px;
   top:230px;
@@ -74,6 +66,4 @@
  .tutorialInfo{left:8px;top:202px;width:180px;padding:11px 12px}
  .tutorialHeader b{font-size:12px}
  .tutorialInfo strong{font-size:13px}
- .tutorialInfo span:not(.tutorialStep){font-size:9px}
- .orderNoLimit{font-size:8px}
-}
+ .tutorialInfo span:not(.tutorialStep){font-size:9px}}
