@@ -48,3 +48,6 @@ Bestellungen annehmen, Zutaten verbrauchen, Grill und Fritteuse timen, Burger ba
 - Die gleiche Render-URL wird auf beiden Geräten geöffnet.
 
 - Grafik-Polish: dunkles Tutorial, transparentere Interaktionsfelder mit passenden Emojis, Geräte näher an der Wand und animierte Geräte/Beleuchtung.
+
+- Stations: Nur die aktuell betretene Interaktionsfläche bzw. ihr Gerät erhält die aktive Kreis-/Glow-/Idle-Animation. Alle anderen Geräte bleiben ruhig.
+- Inventar, Shop und Personal stehen rechts unter dem Zahnrad als vertikale Liste.
