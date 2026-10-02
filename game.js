@@ -68,8 +68,11 @@ let hero={
  cleanliness:100,staff:{kitchen:0,cashier:0,cleaner:0},
  upgrades:{grill:1,fryer:1,shop:1,seats:1,quality:1,register:1}
 };
+const DEFAULT_HERO_STATE=JSON.parse(JSON.stringify(hero));
 let order=null,prep={step:-1,readyAt:0,overAt:0,started:false,duration:2.3},cash={due:0,given:0,change:0,open:false};
 let effects={shake:0,flash:0,steam:[]};
+const SAVE_STORAGE_KEY='bm-save-files-v2';
+let saveSlots=[null,null,null],isHost=false,currentSaveCode='',pendingSave=null,leavingGame=false,kickedForHostLeave=false;
 
 function purgeLegacySaves(){
  try{
@@ -78,6 +81,130 @@ function purgeLegacySaves(){
  }catch{}
 }
 purgeLegacySaves();
+
+function cloneData(v){
+ try{return JSON.parse(JSON.stringify(v))}catch{return null}
+}
+function loadLocalSaveSlots(){
+ try{
+  const raw=localStorage.getItem(SAVE_STORAGE_KEY);
+  const parsed=raw?JSON.parse(raw):[];
+  if(Array.isArray(parsed))saveSlots=Array.from({length:3},(_,i)=>parsed[i]||null);
+ }catch{saveSlots=[null,null,null]}
+}
+function persistLocalSaveSlots(){
+ try{localStorage.setItem(SAVE_STORAGE_KEY,JSON.stringify(saveSlots))}catch{}
+}
+loadLocalSaveSlots();
+
+function resetLocalGameState(){
+ hero=cloneData(DEFAULT_HERO_STATE);
+ order=null;
+ prep={step:-1,readyAt:0,overAt:0,started:false,duration:2.3};
+ cash={due:0,given:0,change:0,open:false};
+ effects={shake:0,flash:0,steam:[]};
+ particles=[];floats=[];others.clear();
+ shopName='BURGER SIMULATOR';dayStartedAt=0;currentSaveCode='';
+ ui();
+}
+function makeSaveSnapshot(slot){
+ const now=performance.now()/1000;
+ return {
+  version:2,
+  slot:Number(slot)+1,
+  savedAt:Date.now(),
+  shopName,
+  dayStartedAt,
+  mobile,
+  hero:cloneData(hero),
+  order:cloneData(order),
+  prep:{
+   step:prep.step,started:prep.started,duration:prep.duration,
+   readyIn:prep.started?Math.max(0,prep.readyAt-now):0,
+   overIn:prep.started?Math.max(0,prep.overAt-now):0
+  },
+  cash:cloneData(cash),
+  effects:cloneData(effects),
+  particles:cloneData(particles),
+  floats:cloneData(floats),
+  players:[
+   {id:me||'host',name:cleanSaveName($('name')?.value||'Hero'),x:hero.x,y:hero.y,host:true},
+   ...[...others.values()].map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,host:false}))
+  ]
+ };
+}
+function cleanSaveName(v){
+ return String(v||'Hero').replace(/[<>]/g,'').trim().slice(0,16)||'Hero';
+}
+function escapeHtml(v){
+ return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function applySaveSnapshot(save){
+ if(!save||typeof save!=='object'||!save.hero)return false;
+ const fresh=cloneData(DEFAULT_HERO_STATE);
+ hero={...fresh,...cloneData(save.hero),
+  staff:{...fresh.staff,...(save.hero.staff||{})},
+  upgrades:{...fresh.upgrades,...(save.hero.upgrades||{})}
+ };
+ if(Number.isFinite(save.hero.x))hero.x=save.hero.x;
+ if(Number.isFinite(save.hero.y))hero.y=save.hero.y;
+ hero.x=Math.max(300,Math.min(1215,hero.x));
+ hero.y=Math.max(120,Math.min(770,hero.y));
+ if(typeof save.shopName==='string'&&save.shopName.trim())shopName=save.shopName;
+ dayStartedAt=Number(save.dayStartedAt)||Date.now();
+ mobile=typeof save.mobile==='boolean'?save.mobile:mobile;
+ order=save.order?cloneData(save.order):null;
+ cash=save.cash?{...cloneData(save.cash)}:{due:0,given:0,change:0,open:false};
+ const p=save.prep||{};
+ const now=performance.now()/1000;
+ prep={
+  step:Number.isFinite(p.step)?p.step:-1,
+  started:!!p.started,
+  duration:Number.isFinite(p.duration)?p.duration:2.3,
+  readyAt:now+Math.max(0,Number(p.readyIn)||0),
+  overAt:now+Math.max(0,Number(p.overIn)||0)
+ };
+ effects=save.effects?cloneData(save.effects):{shake:0,flash:0,steam:[]};
+ particles=Array.isArray(save.particles)?cloneData(save.particles):[];
+ floats=Array.isArray(save.floats)?cloneData(save.floats):[];
+ others.clear();
+ if(save.players?.length){
+  for(const p2 of save.players){
+   if(p2.host||p2.id==='host'||p2.id===me)continue;
+   if(p2.id)others.set(p2.id,{...p2});
+  }
+ }
+ ui();renderInventory();renderShop();renderStaff();
+ return true;
+}
+function renderSaveSlots(targetId='saveList',modeType='save'){
+ const el=$(targetId);if(!el)return;
+ el.innerHTML=saveSlots.map((slot,i)=>{
+  if(!slot){
+   return '<div class="saveSlot empty"><div class="saveSlotInfo"><div class="saveSlotTop"><b>SAVE FILE '+(i+1)+'</b></div><div class="saveSlotName">Noch nicht belegt</div><div class="saveSlotStats"><span>Kein Speicherpunkt vorhanden</span></div></div>'+
+    (modeType==='save'?'<button data-save-slot="'+i+'">SLOT '+(i+1)+' ERSTELLEN</button>':'<button disabled>LEER</button>')+'</div>';
+  }
+  const money=Number(slot.money||0).toLocaleString('de-DE',{maximumFractionDigits:0});
+  const rating=Number(slot.rating||0).toFixed(1);
+  const safeName=escapeHtml(slot.name||'BURGER SIMULATOR');
+  const safeCode=escapeHtml(slot.code||'--------');
+  const action=modeType==='save'?'SPEICHERN':'LADEN';
+  const disabled=modeType==='save'&&!isHost?' disabled':'';
+  return '<div class="saveSlot"><div class="saveSlotInfo"><div class="saveSlotTop"><b>SAVE FILE '+(i+1)+'</b><span class="saveSlotName">'+safeName+'</span></div><div class="saveSlotStats"><span>💶 €'+money+'</span><span>⭐ '+rating+'</span></div><div class="saveSlotCode">CODE '+safeCode+'</div></div><button data-save-slot="'+i+'"'+disabled+'>'+action+'</button></div>';
+ }).join('');
+ el.querySelectorAll('[data-save-slot]').forEach(b=>{
+  wirePressAnimation(b);
+  b.onclick=()=>modeType==='save'?saveToSlot(Number(b.dataset.saveSlot)):loadLocalSlot(Number(b.dataset.saveSlot));
+ });
+}
+function renderAllSaveLists(){
+ renderSaveSlots('saveList','save');
+ renderSaveSlots('startSaveList','load');
+}
+function localSaveByCode(code){
+ const c=String(code||'').trim().toUpperCase();
+ return saveSlots.find(s=>s?.code===c)||null;
+}
 
 function resize(){
  W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2);
@@ -152,6 +279,12 @@ function ui(){
  if(dot){dot.className=connection==='connected'?'online':connection==='connecting'?'connecting':'offline'}
  if($('mobileToggle'))$('mobileToggle').checked=mobile;
  if($('shopNameInput')&&document.activeElement!==$('shopNameInput'))$('shopNameInput').value=shopName;
+ const saveBtn=$('saveGameOpen'),hostHint=$('saveHostHint');
+ if(saveBtn){
+  saveBtn.disabled=!isHost;
+  saveBtn.textContent=isHost?'💾 SPIEL SPEICHERN':'🔒 NUR HOST KANN SPEICHERN';
+ }
+ if(hostHint)hostHint.textContent=isHost?'Du bist Host dieser Lobby. Deine drei Save Files kannst du hier speichern.':'Du bist nicht der Host. Nur der Host kann einen Speicherpunkt erstellen.';
  updateMobileStart();
 }
 function stepHint(){
@@ -167,11 +300,11 @@ function makeOrder(){
  ui();
 }
 function startGame(showStory=true){
- mode='game';$('menu').classList.add('hidden');$('join').classList.add('hidden');$('hud').classList.remove('hidden');
+ mode='game';$('menu').classList.add('hidden');$('join').classList.add('hidden');$('loadSave').classList.add('hidden');$('hud').classList.remove('hidden');
  resetJoy();resize();if(!order)makeOrder();ui();
  if(showStory)setTimeout(()=>{$('storyPanel')?.classList.remove('hidden')},140);
 }
-function connect(type,code=''){
+function connect(type,code='',extra={}){
  if(connectBusy)return;
  connectBusy=true;connection='connecting';ui();
  if(ws){try{ws.close()}catch{}ws=null}
@@ -187,18 +320,21 @@ function connect(type,code=''){
  },7000);
  ws.onopen=()=>{
   clearTimeout(connectTimer);connection='connected';connectBusy=false;ui();
-  ws.send(JSON.stringify({type:type,name:($('name')?.value||'Hero').slice(0,16),code:String(code||'').trim().toUpperCase()}));
+  ws.send(JSON.stringify({type:type,name:cleanSaveName($('name')?.value||'Hero'),code:String(code||'').trim().toUpperCase(),...extra}));
  };
  ws.onmessage=e=>{
   let m;try{m=JSON.parse(e.data)}catch{return}
   if(m.type==='roomCreated'||m.type==='joined'){
-   room=m.code;me=m.id;connectBusy=false;connection='connected';
+   room=m.code;me=m.id;connectBusy=false;connection='connected';isHost=(m.hostId?m.hostId===me:type!=='join');
+   if(m.loaded&&m.save)applySaveSnapshot(m.save);
    if(mode!=='game')startGame(false);
+   currentSaveCode=m.saveCode||currentSaveCode;
    toast(m.type==='roomCreated'?'🍔 ROOM '+room+' ERSTELLT':'🤝 CO-OP VERBUNDEN');
    ui();
   }
   if(m.type==='state'){
    room=m.code||room;
+   if(m.host) isHost=(m.host===me);
    applyBusiness(m.business||{});
    const seen=new Set();
    for(const p of m.players||[]){
@@ -214,16 +350,32 @@ function connect(type,code=''){
   }
   if(m.type==='sale'){toast('💵 CO-OP Verkauf: '+fmt(m.amount)+' €');burst(hero.x,hero.y,18)}
   if(m.type==='dayEnded'){toast('🌙 TAG '+((m.day)||hero.day)+' STARTET');hero.revenueToday=0;hero.expensesToday=0;hero.shiftRevenue=0;hero.shiftExpenses=0;makeOrder();ui()}
+  if(m.type==='saveCreated'){
+   const idx=Math.max(0,Math.min(2,Number(m.slot||1)-1));
+   const local={slot:idx+1,name:m.shopName||shopName,money:Number(m.money||hero.money),rating:Number(m.rating||hero.rating),code:String(m.saveCode||''),savedAt:Number(m.savedAt||Date.now()),snapshot:m.save||makeSaveSnapshot(idx)};
+   saveSlots[idx]=local;persistLocalSaveSlots();currentSaveCode=local.code;pendingSave=local;
+   renderAllSaveLists();
+   $('savePanel')?.classList.add('hidden');$('settingsPanel')?.classList.add('hidden');
+   setText('saveResultSlot','SAVE FILE '+(idx+1)+' • '+local.name+' • 💶 €'+Number(local.money).toLocaleString('de-DE',{maximumFractionDigits:0})+' • ⭐ '+local.rating.toFixed(1));
+   setText('saveResultCode',local.code);
+   $('saveResultPanel')?.classList.remove('hidden');
+  }
+  if(m.type==='hostLeft'){
+   kickedForHostLeave=true;connection='offline';connectBusy=false;isHost=false;others.clear();showHostLeftPopup();
+  }
   if(m.type==='error'){connectBusy=false;connection='offline';clearTimeout(connectTimer);ui();toast('❌ '+m.message)}
  };
  ws.onerror=()=>{connection='offline';connectBusy=false;ui()};
- ws.onclose=()=>{clearTimeout(connectTimer);connectBusy=false;connection='offline';ui();if(mode==='game')toast('⚠️ Server getrennt — du kannst lokal weiterspielen')};
+ ws.onclose=()=>{clearTimeout(connectTimer);connectBusy=false;connection='offline';ui();
+   if(leavingGame||kickedForHostLeave)return;
+   if(mode==='game')toast('⚠️ Server getrennt — du kannst lokal weiterspielen');
+ };
 }
 function send(type,data={}){if(ws?.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type,...data}))}
 
 $('create').onclick=()=>{
  if(connectBusy)return;
- startGame(true);toast('🌐 ROOM WIRD ERSTELLT…');connect('create');
+ resetLocalGameState();isHost=true;mode='menu';startGame(true);toast('🌐 ROOM WIRD ERSTELLT…');connect('create');
 };
 $('joinOpen').onclick=()=>{
  if(connectBusy)return;
@@ -233,9 +385,36 @@ $('joinOpen').onclick=()=>{
 $('joinRoomBtn').onclick=()=>{
  const code=($('code')?.value||'').trim().toUpperCase();
  if(code.length!==5)return toast('⚠️ Bitte den 5-stelligen Raumcode eingeben.');
- connect('join',code);
+ resetLocalGameState();isHost=false;connect('join',code);
 };
 $('back').onclick=()=>{$('join').classList.add('hidden');$('menu').classList.remove('hidden');connection='offline';ui()};
+$('loadSaveOpen').onclick=()=>{
+ $('menu').classList.add('hidden');$('join').classList.add('hidden');$('loadSave').classList.remove('hidden');renderSaveSlots('startSaveList','load');setTimeout(()=>$('saveCodeInput')?.focus(),80);
+};
+$('loadSaveBack').onclick=()=>{
+ $('loadSave').classList.add('hidden');$('menu').classList.remove('hidden');
+};
+$('saveCodeInput').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)});
+function loadLocalSlot(index){
+ const slot=saveSlots[index];if(!slot?.code)return toast('⚠️ Dieser Speicherplatz ist leer.');
+ loadSaveByCode(slot.code);
+}
+function loadSaveByCode(code){
+ const c=String(code||'').trim().toUpperCase();
+ if(c.length!==8)return toast('⚠️ Bitte den 8-stelligen Save-Code eingeben.');
+ const local=localSaveByCode(c);
+ if(local?.snapshot){
+  leavingGame=false;kickedForHostLeave=false;isHost=true;connection='connecting';
+  toast('💾 SAVE FILE wird geladen…');
+  connect('createLoaded','',{save:local.snapshot,saveCode:local.code});
+  return;
+ }
+ leavingGame=false;kickedForHostLeave=false;isHost=true;
+ toast('🌐 SAVE FILE wird vom Server geladen…');
+ connect('loadSave',c);
+}
+$('loadSaveCodeBtn').onclick=()=>loadSaveByCode($('saveCodeInput')?.value||'');
+
 $('code').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5)});
 
 $('how').onclick=()=>{
@@ -246,8 +425,44 @@ $('storyClose').onclick=()=>{
  $('storyPanel')?.classList.add('hidden');
  if(mode==='menu')$('menu').style.visibility='visible';
 };
-$('settings').onclick=()=>$('settingsPanel').classList.remove('hidden');
+$('settings').onclick=()=>{
+ $('settingsPanel').classList.remove('hidden');
+ renderSaveSlots('saveList','save');
+};
 $('settingsClose').onclick=()=>$('settingsPanel').classList.add('hidden');
+$('saveGameOpen').onclick=()=>{
+ if(!isHost)return toast('🔒 Nur der Host kann speichern.');
+ if(ws?.readyState!==WebSocket.OPEN)return toast('❌ Nicht mit dem Server verbunden.');
+ $('settingsPanel').classList.add('hidden');$('savePanel').classList.remove('hidden');
+ renderSaveSlots('saveList','save');
+};
+$('saveClose').onclick=()=>$('savePanel').classList.add('hidden');
+$('saveCloseX').onclick=()=>$('savePanel').classList.add('hidden');
+function saveToSlot(index){
+ if(!isHost)return toast('🔒 Nur der Host kann speichern.');
+ if(ws?.readyState!==WebSocket.OPEN)return toast('❌ Nicht mit dem Server verbunden.');
+ const snapshot=makeSaveSnapshot(index);
+ pendingSave={slot:index+1,snapshot};
+ toast('💾 Speicherpunkt wird erstellt…');
+ send('saveFile',{slot:index+1,save:snapshot});
+}
+$('saveContinue').onclick=()=>{$('saveResultPanel').classList.add('hidden');pendingSave=null};
+$('saveLeave').onclick=()=>{$('saveResultPanel').classList.add('hidden');leaveToMenu()};
+function showHostLeftPopup(){
+ leavingGame=false;mode='menu';room='';me='';isHost=false;others.clear();
+ $('hud').classList.add('hidden');$('join').classList.add('hidden');$('loadSave').classList.add('hidden');$('menu').classList.remove('hidden');$('menu').style.visibility='visible';
+ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));
+ $('hostLeftPanel').classList.remove('hidden');ui();
+}
+function leaveToMenu(){
+ leavingGame=true;mode='menu';isHost=false;connection='offline';others.clear();
+ document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));
+ $('hud').classList.add('hidden');$('join').classList.add('hidden');$('loadSave').classList.add('hidden');$('menu').classList.remove('hidden');$('menu').style.visibility='visible';ui();
+ if(ws?.readyState===WebSocket.OPEN)send('leave');
+ setTimeout(()=>{try{ws?.close()}catch{};ws=null;room='';me='';leavingGame=false},350);
+}
+$('hostLeftOk').onclick=()=>{$('hostLeftPanel').classList.add('hidden');ui()};
+wirePressAnimation($('saveGameOpen'));
 
 function wirePressAnimation(el){
  if(!el)return;
