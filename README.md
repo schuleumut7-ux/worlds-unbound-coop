@@ -46,3 +46,5 @@ Bestellungen annehmen, Zutaten verbrauchen, Grill und Fritteuse timen, Burger ba
 - Start Command: `npm start`
 - Der Server nutzt `PORT` automatisch.
 - Die gleiche Render-URL wird auf beiden Geräten geöffnet.
+
+- Grafik-Polish: dunkles Tutorial, transparentere Interaktionsfelder mit passenden Emojis, Geräte näher an der Wand und animierte Geräte/Beleuchtung.
