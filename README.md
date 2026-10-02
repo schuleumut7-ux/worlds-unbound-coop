@@ -10,6 +10,7 @@ Online 2-player burger-shop simulator built with HTML, CSS, JavaScript and Node.
 - Die rechte Stationen-Hilfe wurde entfernt.
 - Mobile Aktion ist nur noch **✋ Interagieren**. Die zusätzlichen Kasse-/Q-Buttons sind entfernt.
 - Der manuelle Schicht-Ende-Button wurde durch eine automatische **Uhrzeit-/Tage-System** ersetzt.
+- Das Zeitlimit pro Burger-Bestellung wurde vorerst entfernt. Bestellungen laufen nicht mehr ab.
 - Ein Tag dauert 5 Minuten Echtzeit und läuft von 08:00 bis 22:00 Spielzeit.
 - Das Tutorial-Feld oben links ist reine Info und keine Interaktionsfläche.
 - Das alte Save-Slot-/Save-Code-System bleibt entfernt.
