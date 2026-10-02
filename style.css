@@ -15,3 +15,65 @@
   .roomChip{order:6}
   #settings{order:7}
 }
+
+/* --- Burger Simulator screenshot polish --- */
+.orderNoLimit{
+  color:#8ff0aa;
+  font-size:9px;
+  letter-spacing:.08em;
+  font-weight:1000;
+  opacity:.95;
+}
+.tutorialInfo{
+  position:fixed;
+  left:14px;
+  top:230px;
+  width:205px;
+  padding:14px 15px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#f7f7f5,#dfe1df);
+  color:#171917;
+  border:2px solid #c5c8c5;
+  box-shadow:0 18px 48px #0008, inset 0 1px #fff;
+  z-index:19;
+  transition:opacity .25s ease,transform .25s ease;
+}
+.tutorialInfo.tutorialDone{
+  opacity:0;
+  transform:translateY(-10px) scale(.96);
+  pointer-events:none;
+}
+.tutorialHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.tutorialHeader b{font-size:14px;letter-spacing:.02em}
+.tutorialStep{
+  padding:3px 7px;
+  border-radius:999px;
+  background:#171917;
+  color:#ffe18b;
+  font-size:8px;
+  font-weight:1000;
+}
+.tutorialInfo strong{
+  display:block;
+  font-size:15px;
+  margin-bottom:4px;
+}
+.tutorialInfo span:not(.tutorialStep){
+  display:block;
+  font-size:10px;
+  line-height:1.45;
+  color:#444944;
+}
+@media(max-width:700px){
+ .tutorialInfo{left:8px;top:202px;width:180px;padding:11px 12px}
+ .tutorialHeader b{font-size:12px}
+ .tutorialInfo strong{font-size:13px}
+ .tutorialInfo span:not(.tutorialStep){font-size:9px}
+ .orderNoLimit{font-size:8px}
+}
