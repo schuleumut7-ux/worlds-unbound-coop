@@ -19,14 +19,14 @@ const station={
  grill:{x:615,y:245,label:'GRILL',color:'#e26b3e',emoji:'🔥'},
  cheese:{x:765,y:245,label:'CHEESE',color:'#efcf66',emoji:'🧀'},
  assembly:{x:915,y:245,label:'ASSEMBLY',color:'#debc69',emoji:'🍔'},
- cash:{x:1160,y:365,label:'KASSE',color:'#5bc78b',emoji:'💵'}
+ cash:{x:1160,y:455,label:'KASSE',color:'#5bc78b',emoji:'💵'}
 };
 const interactionPad={
  bun:{x:465,y:335,w:118,h:60},
  grill:{x:615,y:335,w:118,h:60},
  cheese:{x:765,y:335,w:118,h:60},
  assembly:{x:915,y:335,w:118,h:60},
- cash:{x:1160,y:500,w:150,h:68}
+ cash:{x:1160,y:370,w:150,h:60}
 };
 function insidePad(pad,x,y,margin=0){
  return x>=pad.x-pad.w/2-margin&&x<=pad.x+pad.w/2+margin&&y>=pad.y-pad.h/2-margin&&y<=pad.y+pad.h/2+margin;
@@ -38,7 +38,8 @@ function circleHitsRect(x,y,r,rect){
 }
 const solidObstacles=[
  {x:325,y:210,w:70,h:390},   // Lager/Kühlschrank
- {x:390,y:420,w:850,h:72} // lange Ausgabe-Theke
+ {x:390,y:420,w:390,h:72},     // linkes Thekenstück
+ {x:930,y:420,w:305,h:72}      // rechtes Thekenstück
 ];
 function hitsStationBody(x,y){
  for(const p of Object.values(station)){
@@ -771,18 +772,57 @@ function drawFridge(){
  ctx.globalAlpha=1;txt('LAGER',360,628,10,'#dce6e1');
 }
 function drawCounter(){
- shadow(815,500,430,18,.35);
- ctx.fillStyle='#151b18';rr(385,410,860,86,18);
- ctx.fillStyle='#714a31';rr(398,420,834,62,14);
- ctx.fillStyle='#9b6b43';rr(412,430,806,14,7);
- ctx.fillStyle='#3a2a20';rr(430,451,760,22,7);
- ctx.strokeStyle='#b8895b';ctx.lineWidth=2;ctx.strokeRect(440,455,740,14);
- ctx.fillStyle='#d7b17c';
- for(let i=0;i<9;i++)ctx.fillRect(455+i*80,458,45,7);
- ctx.fillStyle='#58d993';ctx.globalAlpha=.82;
- rr(1122,426,88,36,9);ctx.globalAlpha=1;
- txt('KASSE',1166,450,11,'#173d27');
- txt('AUSGABE',815,402,12,'#fff');
+  // Long service counter with a real central walk-through.
+  shadow(800,505,410,18,.35);
+
+  // Split counter base leaves a broad passage to the kitchen.
+  ctx.fillStyle='#151b18';
+  rr(385,410,400,86,18);
+  rr(925,410,325,86,18);
+
+  // Warm wood front.
+  ctx.fillStyle='#714a31';
+  rr(398,420,374,62,14);
+  rr(938,420,299,62,14);
+
+  // Bright counter top.
+  ctx.fillStyle='#d6c0a1';
+  rr(398,416,374,16,8);
+  rr(938,416,299,16,8);
+
+  // Front panels.
+  for(const x of [420,520,620,720,960,1060,1160]){
+    ctx.fillStyle='#4a3427';
+    rr(x,448,72,23,7);
+    ctx.strokeStyle='#8f6645';
+    ctx.lineWidth=1.5;
+    ctx.strokeRect(x+1,449,70,21);
+  }
+
+  // Pickup/service opening.
+  ctx.fillStyle='rgba(235,244,239,.16)';
+  rr(412,436,346,10,5);
+  rr(952,436,272,10,5);
+
+  // Register embedded in the right counter.
+  ctx.fillStyle='#202722';
+  rr(1110,424,100,49,10);
+  ctx.fillStyle='#58d993';
+  rr(1122,432,76,24,7);
+  ctx.fillStyle='#8ef0bb';
+  for(let i=0;i<4;i++)ctx.fillRect(1130+i*15,462,9,5);
+  txt('€',1160,451,18,'#173d27');
+
+  // Pickup sign.
+  ctx.fillStyle='#242c27';
+  rr(585,388,190,28,9);
+  txt('BESTELLUNG • ABHOLUNG',680,407,10,'#fff');
+
+  // Passage marker.
+  ctx.fillStyle='#f0d08a';
+  ctx.globalAlpha=.85;
+  txt('←  DURCHGANG  →',810,472,11,'#2a211a');
+  ctx.globalAlpha=1;
 }
 function drawInteractionPads(t){
  const emoji={bun:'🍞',grill:'🥩',cheese:'🧀',assembly:'🍔',cash:'💶'};
