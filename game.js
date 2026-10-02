@@ -15,18 +15,18 @@ const recipes=[
  {name:'Double Burger',price:14.5,steps:['bun','grill','grill','cheese','assembly'],icons:'🍞 → 🥩🥩 → 🧀 → 🍔 → 💵',need:{bun:1,patty:2,cheese:1}},
 ];
 const station={
- bun:{x:465,y:325,label:'BUN',color:'#d19a63',emoji:'🍞'},
- grill:{x:615,y:325,label:'GRILL',color:'#e26b3e',emoji:'🔥'},
- cheese:{x:765,y:325,label:'CHEESE',color:'#efcf66',emoji:'🧀'},
- assembly:{x:915,y:325,label:'ASSEMBLY',color:'#debc69',emoji:'🍔'},
- cash:{x:1085,y:625,label:'KASSE',color:'#5bc78b',emoji:'💵'}
+ bun:{x:465,y:245,label:'BUN',color:'#d19a63',emoji:'🍞'},
+ grill:{x:615,y:245,label:'GRILL',color:'#e26b3e',emoji:'🔥'},
+ cheese:{x:765,y:245,label:'CHEESE',color:'#efcf66',emoji:'🧀'},
+ assembly:{x:915,y:245,label:'ASSEMBLY',color:'#debc69',emoji:'🍔'},
+ cash:{x:1160,y:365,label:'KASSE',color:'#5bc78b',emoji:'💵'}
 };
 const interactionPad={
- bun:{x:465,y:412,w:118,h:60},
- grill:{x:615,y:412,w:118,h:60},
- cheese:{x:765,y:412,w:118,h:60},
- assembly:{x:915,y:412,w:118,h:60},
- cash:{x:1085,y:704,w:150,h:68}
+ bun:{x:465,y:335,w:118,h:60},
+ grill:{x:615,y:335,w:118,h:60},
+ cheese:{x:765,y:335,w:118,h:60},
+ assembly:{x:915,y:335,w:118,h:60},
+ cash:{x:1160,y:500,w:150,h:68}
 };
 function insidePad(pad,x,y,margin=0){
  return x>=pad.x-pad.w/2-margin&&x<=pad.x+pad.w/2+margin&&y>=pad.y-pad.h/2-margin&&y<=pad.y+pad.h/2+margin;
@@ -38,7 +38,7 @@ function circleHitsRect(x,y,r,rect){
 }
 const solidObstacles=[
  {x:325,y:210,w:70,h:390},   // Lager/Kühlschrank
- {x:1240,y:470,w:115,h:300} // rechter Kassen-Counter
+ {x:390,y:420,w:850,h:72} // lange Ausgabe-Theke
 ];
 function hitsStationBody(x,y){
  for(const p of Object.values(station)){
@@ -771,17 +771,18 @@ function drawFridge(){
  ctx.globalAlpha=1;txt('LAGER',360,628,10,'#dce6e1');
 }
 function drawCounter(){
- shadow(1300,778,68,15,.35);
- ctx.fillStyle='#151b18';rr(1236,455,123,326,18);
- ctx.fillStyle='#714a31';rr(1247,468,101,300,14);
- ctx.fillStyle='#2b2119';rr(1259,500,77,126,10);
- ctx.strokeStyle='#a77a52';ctx.lineWidth=2;ctx.strokeRect(1264,506,67,113);
- ctx.fillStyle='#8f6b48';
- for(let i=0;i<4;i++)ctx.fillRect(1267+i*15,526,10,82);
- const cg=.5+.5*Math.sin(performance.now()*.004);
- ctx.fillStyle='#162019';rr(1258,646,80,72,10);
- ctx.fillStyle='#58d993';ctx.globalAlpha=.72+.2*cg;rr(1266,655,64,42,8);ctx.globalAlpha=1;
- txt('€',1298,684,24,'#173d27');txt('KASSE',1298,742,11,'#fff');
+ shadow(815,500,430,18,.35);
+ ctx.fillStyle='#151b18';rr(385,410,860,86,18);
+ ctx.fillStyle='#714a31';rr(398,420,834,62,14);
+ ctx.fillStyle='#9b6b43';rr(412,430,806,14,7);
+ ctx.fillStyle='#3a2a20';rr(430,451,760,22,7);
+ ctx.strokeStyle='#b8895b';ctx.lineWidth=2;ctx.strokeRect(440,455,740,14);
+ ctx.fillStyle='#d7b17c';
+ for(let i=0;i<9;i++)ctx.fillRect(455+i*80,458,45,7);
+ ctx.fillStyle='#58d993';ctx.globalAlpha=.82;
+ rr(1122,426,88,36,9);ctx.globalAlpha=1;
+ txt('KASSE',1166,450,11,'#173d27');
+ txt('AUSGABE',815,402,12,'#fff');
 }
 function drawInteractionPads(t){
  const emoji={bun:'🍞',grill:'🥩',cheese:'🧀',assembly:'🍔',cash:'💶'};
