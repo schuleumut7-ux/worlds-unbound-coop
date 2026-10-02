@@ -17,20 +17,20 @@ const recipes=[
  {name:'Mega Combo',price:17,steps:['bun','grill','cheese','assembly','fryer','cash'],icons:'🍞 → 🥩 → 🧀 → 🍔 → 🍟 → 💵',need:{bun:1,patty:1,cheese:1,fries:1}}
 ];
 const station={
- bun:{x:470,y:310,label:'BUN',color:'#d19a63',emoji:'🍞'},
- grill:{x:660,y:210,label:'GRILL',color:'#e26b3e',emoji:'🔥'},
- cheese:{x:660,y:430,label:'CHEESE',color:'#efcf66',emoji:'🧀'},
- assembly:{x:875,y:315,label:'ASSEMBLY',color:'#debc69',emoji:'🍔'},
- fryer:{x:1065,y:205,label:'FRYER',color:'#e5a52f',emoji:'🍟'},
- cash:{x:1065,y:450,label:'KASSE',color:'#5bc78b',emoji:'💵'}
+ bun:{x:465,y:365,label:'BUN',color:'#d19a63',emoji:'🍞'},
+ grill:{x:615,y:365,label:'GRILL',color:'#e26b3e',emoji:'🔥'},
+ cheese:{x:765,y:365,label:'CHEESE',color:'#efcf66',emoji:'🧀'},
+ assembly:{x:915,y:365,label:'ASSEMBLY',color:'#debc69',emoji:'🍔'},
+ fryer:{x:1085,y:365,label:'FRYER',color:'#e5a52f',emoji:'🍟'},
+ cash:{x:1085,y:650,label:'KASSE',color:'#5bc78b',emoji:'💵'}
 };
 const interactionPad={
- bun:{x:470,y:395,w:104,h:62},
- grill:{x:660,y:295,w:104,h:62},
- cheese:{x:660,y:515,w:104,h:62},
- assembly:{x:875,y:400,w:104,h:62},
- fryer:{x:1065,y:290,w:104,h:62},
- cash:{x:1065,y:535,w:104,h:62}
+ bun:{x:465,y:455,w:118,h:66},
+ grill:{x:615,y:455,w:118,h:66},
+ cheese:{x:765,y:455,w:118,h:66},
+ assembly:{x:915,y:455,w:118,h:66},
+ fryer:{x:1085,y:455,w:118,h:66},
+ cash:{x:1085,y:735,w:150,h:72}
 };
 function insidePad(pad,x,y,margin=0){
  return x>=pad.x-pad.w/2-margin&&x<=pad.x+pad.w/2+margin&&y>=pad.y-pad.h/2-margin&&y<=pad.y+pad.h/2+margin;
@@ -57,7 +57,7 @@ const supplyInfo={
  drinks:{label:'Getränke',unit:'🥤',price:14}
 };
 let hero={
- x:650,y:610,speed:210,money:500,debt:1000000,level:1,xp:0,day:1,rep:0,rating:4.2,
+ x:765,y:565,speed:210,money:500,debt:1000000,level:1,xp:0,day:1,rep:0,rating:4.2,
  bun:12,patty:12,cheese:8,fries:8,packaging:10,drinks:8,
  sales:0,revenueToday:0,expensesToday:0,shiftRevenue:0,shiftExpenses:0,completed:0,missed:0,
  cleanliness:100,staff:{kitchen:0,cashier:0,cleaner:0},
@@ -104,6 +104,28 @@ function clockInfo(now=Date.now()){
  const mm=String(minutes%60).padStart(2,'0');
  return {text:hh+':'+mm,remaining:Math.max(0,DAY_LENGTH_MS-elapsed)};
 }
+function tutorialUpdate(){
+ const el=$('tutorialInfo');
+ if(!el)return;
+ if(hero.completed>=1){
+  el.classList.add('tutorialDone');
+  return;
+ }
+ el.classList.remove('tutorialDone');
+ const s=order?.steps?.[order.stepIndex];
+ const title=$('tutorialTitle'),textEl=$('tutorialText'),stepEl=el.querySelector('.tutorialStep');
+ if(!s){
+  if(title)title.textContent='Jetzt bezahlen';
+  if(textEl)textEl.textContent='Stell dich auf das graue Kassenfeld und gib das richtige Rückgeld.';
+  if(stepEl)stepEl.textContent='3 / 3';
+  return;
+ }
+ const labels={bun:'Brötchen',grill:'Patty grillen',cheese:'Käse',assembly:'Burger bauen',fryer:'Pommes',cash:'Kasse'};
+ if(title)title.textContent='Nächster Schritt: '+(labels[s]||s);
+ if(textEl)textEl.textContent='Stell dich auf das graue Feld vor '+(station[s]?.label||'der Station')+' und drücke E oder ✋.';
+ const idx=Math.min(2,order.stepIndex+1);
+ if(stepEl)stepEl.textContent=idx+' / 3';
+}
 function ui(){
  setText('money',Math.floor(hero.money).toLocaleString('de-DE'));
  setText('debt',Math.max(0,Math.floor(hero.debt)).toLocaleString('de-DE'));
@@ -115,8 +137,8 @@ function ui(){
  setText('gameClock',clockInfo().text);
  setText('orderName',order?order.name:'Keine Bestellung');
  setText('recipeLine',order?order.icons:'Warte auf Kunden…');
- setText('orderTimer',order?Math.max(0,Math.ceil(order.timer))+'s':'—');
  setText('orderHint',order?stepHint():'Neue Gäste kommen gleich.');
+ tutorialUpdate();
  const done=order?Math.min(1,order.stepIndex/order.steps.length):0;
  const bar=$('orderProgress');if(bar)bar.style.width=(done*100)+'%';
  document.body.classList.toggle('mobileOn',mobile);
@@ -135,7 +157,7 @@ function stepHint(){
 }
 function makeOrder(){
  const base=recipes[Math.floor(Math.random()*recipes.length)];
- order={...base,steps:[...base.steps],need:{...base.need},stepIndex:0,timer:42+Math.max(0,hero.day-1)*1.5};
+ order={...base,steps:[...base.steps],need:{...base.need},stepIndex:0};
  prep={step:-1,readyAt:0,overAt:0,started:false,duration:2.3};
  ui();
 }
@@ -374,6 +396,10 @@ function takePayment(){
  hero.money+=gross;hero.debt=Math.max(0,hero.debt-net*.2);hero.revenueToday+=gross;hero.shiftRevenue+=gross;
  hero.expensesToday+=cost;hero.shiftExpenses+=cost;hero.sales++;hero.completed++;hero.xp+=25+hero.staff.cashier*3;
  hero.rep+=hero.rating>4?1:0;
+ if(hero.completed===1){
+  $('tutorialInfo')?.classList.add('tutorialDone');
+  toast('✅ ERSTER BURGER FERTIG — TUTORIAL ABGESCHLOSSEN');
+ }
  toast('💵 GELD ANGENOMMEN • RÜCKGELD €'+fmt(change));
  addFloat('+€'+fmt(gross),hero.x,hero.y-55);burst(station.cash.x,station.cash.y,25,'#ffe08b');effects.shake=5;
  send('business',{action:'sale',amount:gross,profit:net,day:hero.day});
@@ -460,32 +486,71 @@ function drawKitchen(t){
  ctx.fillStyle='#111614';rr(410,102,680,48,12);ctx.fillStyle='#ffb52f';ctx.shadowBlur=22;ctx.shadowColor='#ff9e28';ctx.fillRect(640,116,220,5);ctx.shadowBlur=0;
  txt('BURGER SIMULATOR',750,137,20,'#ffd477');
  for(let i=0;i<7;i++){const sx=460+i*98;ctx.fillStyle=i%2?'#ffbe49':'#f9e1a5';ctx.globalAlpha=.25+.15*pulse;ctx.beginPath();ctx.arc(sx,91,4,0,7);ctx.fill();ctx.globalAlpha=1}
- drawFridge();drawCounter();drawStations(t);drawInteractionPads();drawQueue(t);
+ drawFridge();drawCounter();drawStations(t);drawInteractionPads(t);drawQueue(t);
 }
 function drawFridge(){
  ctx.fillStyle='#dae3df';rr(325,210,70,390,10);ctx.fillStyle='#b4c4bf';rr(334,222,52,115,7);rr(334,350,52,238,7);
  for(let i=0;i<3;i++){ctx.fillStyle='#7e948d';ctx.fillRect(342,250+i*24,36,6)}txt('LAGER',360,620,10,'#cdd7d2')
 }
 function drawCounter(){
- ctx.fillStyle='#1a211d';rr(1180,185,170,480,20);ctx.fillStyle='#70472e';rr(1195,200,140,440,14);
- ctx.fillStyle='#18211c';rr(1205,235,120,120,10);ctx.fillStyle='#76e0a3';rr(1218,250,94,75,8);
- txt('€',1265,302,34,'#153c27');txt('KASSE',1265,380,12,'#fff');
- ctx.fillStyle='#33261d';rr(1212,425,106,65,9);
- for(let i=0;i<5;i++){ctx.fillStyle='#b89057';ctx.fillRect(1222+i*18,440,13,40)}
+ ctx.fillStyle='#171d19';rr(1240,470,115,300,16);
+ ctx.fillStyle='#6b462f';rr(1250,484,95,278,12);
+ ctx.fillStyle='#2b2119';rr(1262,515,70,115,9);
+ ctx.fillStyle='#b89057';
+ for(let i=0;i<4;i++)ctx.fillRect(1270+i*14,530,10,78);
+ ctx.fillStyle='#171d19';rr(1262,655,72,65,9);
+ txt('KASSE',1298,690,11,'#fff');
 }
-function drawInteractionPads(){
+function drawInteractionPads(t){
  for(const [k,p] of Object.entries(interactionPad)){
   const near=getNearestStation()===k;
-  shadow(p.x,p.y+28,48,8,.24);
+  const pulse=.5+.5*Math.sin(t*.006);
+  shadow(p.x,p.y+33,p.w*.42,10,.34);
   ctx.save();
-  ctx.fillStyle=near?'#d9dcda':'#c8cbc9';
-  rr(p.x-p.w/2,p.y-p.h/2,p.w,p.h,10);
-  ctx.strokeStyle=near?'#fff3':'#9b9f9d';
-  ctx.lineWidth=3;
+
+  const g=ctx.createLinearGradient(0,p.y-p.h/2,0,p.y+p.h/2);
+  g.addColorStop(0,near?'#ffffff':'#f0f2f0');
+  g.addColorStop(.45,'#bfc4c1');
+  g.addColorStop(1,'#8d9490');
+  ctx.fillStyle=g;
+  rr(p.x-p.w/2,p.y-p.h/2,p.w,p.h,11);
+
+  ctx.strokeStyle=near?'#ffcf69':'#69716c';
+  ctx.lineWidth=near?3.5:2.5;
   ctx.stroke();
-  ctx.fillStyle='#3a3e3c';
-  ctx.globalAlpha=near?.9:.55;
-  txt('✋',p.x,p.y+7,18,'#303431');
+
+  ctx.fillStyle='#727976';
+  rr(p.x-p.w/2+6,p.y-p.h/2+6,p.w-12,p.h-12,8);
+  ctx.fillStyle='#424845';
+  rr(p.x-p.w/2+11,p.y-p.h/2+11,p.w-22,p.h-22,6);
+
+  ctx.globalAlpha=near?.95:.72;
+  ctx.strokeStyle=near?'#ffe28a':'#cbd0cd';
+  ctx.lineWidth=1.5;
+  ctx.setLineDash([7,7]);
+  ctx.strokeRect(p.x-p.w/2+17,p.y-p.h/2+17,p.w-34,p.h-34);
+  ctx.setLineDash([]);
+
+  for(const sx of [-1,1]){
+   for(const sy of [-1,1]){
+    ctx.fillStyle='#e4e7e4';
+    ctx.beginPath();
+    ctx.arc(p.x+sx*(p.w/2-12),p.y+sy*(p.h/2-12),2.5,0,Math.PI*2);
+    ctx.fill();
+   }
+  }
+
+  if(near){
+   ctx.globalAlpha=.18+.12*pulse;
+   ctx.fillStyle='#ffd369';
+   ctx.shadowBlur=18;ctx.shadowColor='#ffd369';
+   ctx.beginPath();ctx.ellipse(p.x,p.y,Math.min(28,p.w*.24),Math.min(18,p.h*.27),0,0,Math.PI*2);ctx.fill();
+   ctx.shadowBlur=0;
+  }
+  ctx.globalAlpha=1;
+
+  txt('✋',p.x,p.y+6,20,near?'#ffe28b':'#e1e5e2');
+  txt(near?'INTERAGIEREN':'FELD',p.x,p.y+p.h/2+14,7,near?'#ffe28b':'#bac0bd');
   ctx.restore();
  }
 }
@@ -539,10 +604,6 @@ function loop(t){
  const dt=Math.min(.04,(t-last)/1000);last=t;
  if(mode==='game'&&!cash.open&&!document.querySelector('.modal:not(.hidden)')){
   move(dt);
-  if(order){
-   order.timer-=dt;
-   if(order.timer<=0){hero.missed++;hero.money=Math.max(0,hero.money-10);hero.rating=Math.max(1,hero.rating-.08);toast('😡 Kunde geht — Bestellung verpasst');makeOrder()}
-  }
   performStaff(dt);
   if(ws&&t-(loop.net||0)>120){loop.net=t;sendInput()}
   ui();
