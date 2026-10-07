@@ -38,8 +38,7 @@ function circleHitsRect(x,y,r,rect){
 }
 const solidObstacles=[
  {x:325,y:210,w:70,h:390},   // Lager/Kühlschrank
- {x:390,y:420,w:340,h:72},     // linkes Thekenstück
- {x:965,y:420,w:270,h:72}      // rechtes Thekenstück
+ {x:390,y:420,w:340,h:72}      // linkes Thekenstück
 ];
 function hitsStationBody(x,y){
  for(const p of Object.values(station)){
@@ -772,30 +771,21 @@ function drawFridge(){
  ctx.globalAlpha=1;txt('LAGER',360,628,10,'#dce6e1');
 }
 function drawCounter(){
-  shadow(815,505,430,18,.32);
-
-  // Two counter wings leave a real central entrance.
+  shadow(610,505,250,18,.28);
   ctx.fillStyle='#121815';
   rr(385,410,350,88,18);
-  rr(960,410,275,88,18);
 
-  // Counter front panels.
   ctx.fillStyle='#70492f';
   rr(398,420,324,64,14);
-  rr(973,420,250,64,14);
 
-  // Premium stone/wood counter top.
   ctx.fillStyle='#d7c3a8';
   rr(398,414,324,18,8);
-  rr(973,414,250,18,8);
   ctx.fillStyle='#f3e3c7';
   ctx.globalAlpha=.35;
   rr(410,417,300,5,3);
-  rr(985,417,226,5,3);
   ctx.globalAlpha=1;
 
-  // Decorative front panels.
-  for(const x of [420,520,620,665,990,1080,1170]){
+  for(const x of [420,520,620,665]){
     ctx.fillStyle='#432f24';
     rr(x,449,62,25,7);
     ctx.strokeStyle='#956b49';
@@ -803,18 +793,14 @@ function drawCounter(){
     ctx.strokeRect(x+1,450,60,23);
   }
 
-  // Customer pickup shelves.
   ctx.fillStyle='rgba(240,245,240,.12)';
   rr(412,435,298,9,4);
-  rr(986,435,226,9,4);
 
-  // Central passage frame: the gap itself remains open.
   ctx.fillStyle='#171d19';
   rr(748,410,214,88,18);
   ctx.fillStyle='#2b2119';
   rr(766,421,178,66,14);
 
-  // Built-in register at the center opening.
   ctx.fillStyle='#0e1411';
   rr(792,401,126,77,13);
   ctx.strokeStyle='#8e6a4b';
@@ -825,7 +811,6 @@ function drawCounter(){
   rr(807,412,96,34,9);
   ctx.fillStyle='#62e6a0';
   rr(815,418,80,20,6);
-  ctx.fillStyle='#173d27';
   txt('€',855,434,17,'#173d27');
 
   ctx.fillStyle='#c8b18e';
@@ -833,7 +818,6 @@ function drawCounter(){
   ctx.fillStyle='#5ed797';
   ctx.beginPath();ctx.arc(900,457,5,0,Math.PI*2);ctx.fill();
 
-  // Small order/pickup sign above the counter.
   ctx.fillStyle='#242c27';
   rr(610,389,205,27,9);
   txt('BESTELLUNG • ABHOLUNG',712,407,10,'#fff');
