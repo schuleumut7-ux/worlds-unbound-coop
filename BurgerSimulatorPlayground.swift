@@ -42,7 +42,7 @@ private enum EmbeddedGame {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Burger Simulator V2.2 CO-OP • Playground</title>
+<title>Burger Simulator V2.2 CO-OP</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070807;color:#fff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,sans-serif}body{touch-action:none;-webkit-font-smoothing:antialiased;overscroll-behavior:none}.hidden{display:none!important}button,input{font:inherit}button{border:1px solid #ffffff14;cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid #ffcb64;outline-offset:2px}canvas{position:fixed;inset:0;width:100%;height:100%;image-rendering:auto}.screen{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 15%,#6b421d 0,#20160e 30%,#080908 78%);z-index:100}.screen:before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,#ffbd4317,transparent 35%,#0008),radial-gradient(circle at 80% 70%,#f0a62c10,transparent 35%);pointer-events:none}.card{position:relative;width:min(520px,92vw);padding:34px;border-radius:30px;background:linear-gradient(145deg,#191d1af5,#090c0bf4);border:1px solid #ffffff1d;box-shadow:0 35px 130px #000e,0 0 80px #ffb52d12;backdrop-filter:blur(24px);text-align:center}.titleCard{overflow:hidden}.titleCard:after{content:'🍔';position:absolute;right:-18px;bottom:-34px;font-size:170px;opacity:.05;transform:rotate(-12deg)}.tag{color:#ffd172;font-weight:1000;letter-spacing:.26em;font-size:11px}.titleCard h1{font-size:clamp(66px,14vw,140px);line-height:.75;margin:18px 0;letter-spacing:-.1em;text-shadow:0 12px 40px #000}.titleCard h1 span{color:#ffbc43;text-shadow:0 0 32px #ffad2d33}.lead{color:#c7cbc6;line-height:1.5}.card input,.modal input{width:100%;padding:15px 16px;margin:8px 0;border:1px solid #ffffff14;border-radius:14px;background:#ffffff09;color:#fff;outline:none}.card input:focus,.modal input:focus{border-color:#ffbf5288;box-shadow:0 0 0 3px #ffbf5213}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card button,.modal button{width:100%;padding:14px;margin-top:10px;border-radius:14px;background:linear-gradient(180deg,#ffd36f,#e99a22);color:#241706;font-weight:1000;box-shadow:0 10px 28px #0008}.card button:hover,.modal button:hover{filter:brightness(1.08);transform:translateY(-1px)}button.ghost{background:#ffffff09!important;color:#fff!important;box-shadow:none!important}.miniStats{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:16px}.miniStats span{padding:7px 9px;border-radius:10px;background:#ffffff06;border:1px solid #ffffff0d;color:#8f9891;font-size:11px}.codeInput{text-align:center;font-size:28px;letter-spacing:.25em;text-transform:uppercase}.hidden{display:none!important}#hud{position:fixed;inset:0;z-index:10}header{position:fixed;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid #ffffff15;border-radius:17px;background:linear-gradient(180deg,#111815ed,#090c0be8);backdrop-filter:blur(18px);box-shadow:0 16px 50px #0009,inset 0 1px #fff1;z-index:20}.brand{display:flex;align-items:center;gap:8px;margin-right:auto;color:#ffd06c}.brand small{display:block;font-size:8px;letter-spacing:.14em;color:#7f8a83}.moneyChip,.debtChip,.statChip,.roomChip,.clockChip{padding:8px 10px;border-radius:11px;background:#ffffff06;border:1px solid #ffffff0b;font-size:12px}.moneyChip strong{color:#8ff0aa}.debtChip strong{color:#ff888c}.statChip strong,.roomChip strong{color:#fff}.debtChip{box-shadow:inset 0 -2px #b9465022}.roomChip{display:flex;align-items:center;gap:7px;color:#b7c1ba}.roomChip i{width:7px;height:7px;border-radius:50%;background:#9aa39d;display:block;box-shadow:0 0 10px #ffffff22}.roomChip i.online{background:#65ef9d;box-shadow:0 0 12px #65ef9d99}.roomChip i.connecting{background:#ffd35c;box-shadow:0 0 12px #ffd35c88}.roomChip i.offline{background:#ff7878;box-shadow:0 0 12px #ff787855}.brand+div{margin-left:0}header button{background:#ffffff09;color:#fff;border-radius:11px;padding:9px 11px}.orderPanel{position:fixed;left:14px;top:78px;min-width:290px;max-width:410px;padding:15px 17px;border-radius:17px;background:linear-gradient(145deg,#111916f0,#080b0ae8);border:1px solid #ffffff13;box-shadow:0 15px 45px #0009;backdrop-filter:blur(18px);z-index:18}.orderTop{display:flex;justify-content:space-between;color:#ffcf6a;font-size:10px;font-weight:1000;letter-spacing:.13em}.orderTop b{font-size:12px}.orderPanel #orderName{font-size:21px;font-weight:1000;margin:7px 0 5px}.recipeLine{color:#bec4bf;font-size:11px;line-height:1.45}.progress{height:7px;margin-top:10px;background:#151916;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb438,#ffe28a);box-shadow:0 0 18px #ffba3c66}.orderHint{display:block;color:#828b86;margin-top:7px;font-size:10px}.stationGuide{position:fixed;right:14px;top:78px;display:flex;flex-direction:column;gap:7px;z-index:18}.stationGuide>div{width:106px;padding:9px 10px;border-radius:12px;background:linear-gradient(145deg,#111a16ea,#080c0be8);border:1px solid #ffffff10;box-shadow:0 10px 30px #0007}.stationGuide b{font-size:10px;color:#ffcf6c}.stationGuide small{display:block;color:#7f8a83;font-size:9px;margin-top:2px}.rightTools{position:fixed;right:14px;bottom:15px;display:flex;gap:7px;z-index:18;flex-wrap:wrap;justify-content:flex-end;max-width:470px}.rightTools button{padding:9px 11px;border-radius:11px;background:#0e1511df;color:#dde2dc}.rightTools button:hover{background:#172019}.help{position:fixed;left:14px;bottom:16px;padding:9px 12px;border:1px solid #ffffff0c;border-radius:11px;background:#080c0bdd;color:#aeb6b0;font-size:10px;z-index:17}.objectiveBar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);padding:9px 13px}.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(460px,92vw);max-height:86vh;overflow:auto;padding:25px;border-radius:22px;background:linear-gradient(145deg,#121916fb,#080b0afa);border:1px solid #ffffff1b;box-shadow:0 40px 120px #000e,0 0 60px #ffb52d12;backdrop-filter:blur(22px);z-index:90}.modal h2{margin:4px 0 12px;color:#ffd171}.modal p{color:#b8beb9;line-height:1.5}.modalTag{font-size:10px;letter-spacing:.18em;color:#d39a42;font-weight:1000}.inventoryGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.invItem{padding:11px;border-radius:12px;background:#ffffff06;border:1px solid #ffffff0c}.invItem span{color:#9fa8a2;font-size:11px;display:block}.invItem b{font-size:16px;color:#fff}.shopList{display:grid;gap:8px}.shopItem{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:13px;border-radius:13px;background:#ffffff06;border:1px solid #ffffff0c}.shopItem strong{color:#fff}.shopItem small{display:block;color:#929b95;margin-top:3px}.shopItem button{width:auto;min-width:110px;margin:0}.staffCard{padding:13px;border-radius:13px;background:#ffffff06;border:1px solid #ffffff0c;margin:8px 0}.staffCard>b{display:block}.staffCard>span{display:block;color:#9da49f;font-size:11px;margin:4px 0}.staffCard button{margin-top:5px}.toggleRow{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-top:1px solid #ffffff12}.toggleRow input{width:24px;height:24px;accent-color:#ffbe49}.cashCustomer,.changeBox{display:flex;justify-content:space-between;align-items:center;padding:12px 13px;border-radius:12px;background:#ffffff06;border:1px solid #ffffff0b;margin:7px 0}.cashCustomer strong{color:#fff}.changeBox{background:#162216;border-color:#46764d}.changeBox strong{color:#8ff0aa;font-size:22px}.cashLabel{display:block;color:#aeb6b0;font-size:11px;margin-top:12px}.cashQuick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.cashQuick button{margin:0;padding:11px 7px}.mobileOn #mobile{display:block}.mobileOn .help{display:none}.mobileOn .rightTools{bottom:110px}.mobileOn #joy{display:block}.mobileOn #actions{display:flex}#mobile{display:none}#joy{position:fixed;left:18px;bottom:22px;width:142px;height:142px;border-radius:50%;background:radial-gradient(circle,#ffffff12 0 42%,#ffffff05 43%);border:2px solid #ffffff45;box-shadow:inset 0 0 30px #0005,0 15px 45px #0009;z-index:40;touch-action:none}.joyHint{display:none}#joy:after{content:'';position:absolute;inset:12px;border-radius:50%;border:1px solid #ffffff10}#joy i{position:absolute;left:50%;top:50%;width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#ffe491,#ffad29 72%);box-shadow:0 0 25px #ffb52d55,0 8px 20px #0009;transform:translate(-50%,-50%);pointer-events:none}#actions{position:fixed;right:18px;bottom:22px;display:none;gap:10px;z-index:40}#actions button{width:72px;height:72px;border-radius:50%;border:1px solid #ffffff22;background:radial-gradient(circle at 35% 28%,#ffe48d,#f0a52b 72%);color:#251a0a;font-size:22px;font-weight:1000;box-shadow:0 12px 35px #0009}#actions button+button{background:radial-gradient(circle at 35% 28%,#fffdf2,#ffd98c 72%)}#storyPanel{z-index:120}.mobileStartToggle{display:none!important}#mobile{pointer-events:none!important}#joy{pointer-events:auto!important;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}#joy:active{cursor:grabbing}#actions{pointer-events:none!important}#actions button{pointer-events:auto!important;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}.mobileOff #mobile,.mobileOff #joy,.mobileOff #actions{display:none!important}@media(pointer:coarse){body:not(.mobileOff).mobileOn #mobile,body:not(.mobileOff) #mobile{display:block!important}body:not(.mobileOff) #joy{display:block!important}body:not(.mobileOff) #actions{display:flex!important}.help{display:none!important}}@media(max-width:700px){header{top:7px;left:7px;right:7px;padding:7px;gap:5px}.brand{font-size:11px}.brand small{font-size:7px}.moneyChip,.debtChip,.statChip,.roomChip{font-size:10px;padding:6px 7px}.orderPanel{top:66px;left:8px;max-width:245px;min-width:0;padding:11px 12px}.orderPanel #orderName{font-size:16px}.stationGuide{top:66px;right:8px;gap:4px}.stationGuide>div{width:88px;padding:7px 8px}.rightTools{right:8px;bottom:98px;max-width:250px;gap:5px}.rightTools button{font-size:9px;padding:7px 8px}.help{font-size:9px;left:8px;bottom:8px}.modal{width:min(95vw,440px);padding:18px;max-height:90vh}.cashQuick button{font-size:11px}.cashQuick{grid-template-columns:repeat(4,1fr)}.mobileOn #joy{width:128px;height:128px;left:14px;bottom:max(18px,env(safe-area-inset-bottom))}.mobileOn #actions{right:12px;bottom:max(14px,env(safe-area-inset-bottom))}.mobileOn #actions button{width:62px;height:62px}.titleCard{padding:25px}.row{grid-template-columns:1fr}.miniStats{display:none}.roomChip{order:6}.brand{order:1}.moneyChip{order:2}.debtChip{order:3}.statChip{order:4}.roomChip{order:5}#settings{order:7}}
 .clockChip{color:#cbd6cf}
@@ -1489,22 +1489,226 @@ function applyBusiness(d){
  if(Number.isFinite(d.dayStartedAt))dayStartedAt=d.dayStartedAt;
  ui();
 }
+
+/* ===== BURGER SIMULATOR V2.2 DIRECT CUSTOMER SYSTEM ===== */
+const v22={customers:[],nextId:1,spawnTimer:1.2,tray:null,heldFood:null,
+ tables:[
+  {id:1,x:505,y:640,occupied:false,dirty:false,customerId:null,seat:{x:505,y:695}},
+  {id:2,x:785,y:640,occupied:false,dirty:false,customerId:null,seat:{x:785,y:695}}
+ ],
+ trash:{x:1120,y:650},door:{x:1160,y:795}
+};
+function v22Style(){
+ if($('v22Style'))return;
+ const st=document.createElement('style');st.id='v22Style';
+ st.textContent=\`
+ #v22OrderBox,#v22CashBox{position:fixed;z-index:80;left:50%;top:50%;transform:translate(-50%,-50%);width:min(430px,90vw);background:rgba(15,20,18,.97);border:1px solid rgba(255,218,130,.5);border-radius:18px;box-shadow:0 20px 60px #0009;padding:20px;color:#fff;font-family:Inter,system-ui,sans-serif}
+ #v22OrderBox h2,#v22CashBox h2{margin:0 0 8px;font-size:22px}
+ #v22OrderBox p,#v22CashBox p{margin:7px 0;color:#dce6e1}
+ .v22Buttons{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+ .v22Btn{border:1px solid #ffffff22;background:#26312b;color:#fff;border-radius:11px;padding:11px 14px;font-weight:800;font-size:14px}
+ .v22Btn.primary{background:#d99a38;color:#17120a;border-color:#ffd879}
+ .v22Bills{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}
+ .v22Bill{border:1px solid #ffffff25;border-radius:10px;background:#304238;color:#fff;padding:13px 5px;font-weight:900}
+ .v22Change{font-size:26px;font-weight:900;margin:12px 0;color:#ffe08b}
+ \`;
+ document.head.appendChild(st);
+}
+function v22Box(id,html){
+ v22Style();let el=$(id);
+ if(!el){el=document.createElement('div');el.id=id;document.body.appendChild(el)}
+ el.innerHTML=html;el.classList.remove('hidden');return el;
+}
+function v22Close(id){$(id)?.classList.add('hidden')}
+function v22FreeTable(){return v22.tables.find(t=>!t.occupied&&!t.dirty)||null}
+function v22Spawn(){
+ if(mode!=='game'||v22.customers.length>=4||!v22FreeTable())return;
+ const c={id:v22.nextId++,x:v22.door.x,y:v22.door.y,color:['#df8e67','#63c8ff','#c78de8','#77d49a'][v22.nextId%4],
+ state:'walking',tx:1120,ty:540,nextState:'cashier',order:null,paid:false,tableId:null,eatUntil:0};
+ v22.customers.push(c);
+}
+function v22Order(c){
+ const r=recipes[Math.floor(Math.random()*recipes.length)],qty=Math.random()<.35?2:1,steps=[];
+ for(let i=0;i<qty;i++)steps.push(...r.steps);
+ const need={};for(const[k,n]of Object.entries(r.need))need[k]=n*qty;
+ c.order={name:r.name,price:Math.round(r.price*qty*100)/100,qty,steps,need,icons:(qty>1?qty+'× ':'')+r.icons,stepIndex:0,customerId:c.id};
+ order=c.order;
+}
+function v22OpenOrder(c){
+ const el=v22Box('v22OrderBox',
+ '<h2>🧑 Bestellung</h2><p>Der Kunde möchte:</p><p><b>🍔 '+escapeHtml((c.order?.qty||'1')+'× '+(c.order?.name||'Burger'))+'</b></p><p>Bestätige die Bestellung. Danach kommt die Zahlung.</p><div class="v22Buttons"><button class="v22Btn primary" id="v22Confirm">BESTÄTIGEN</button><button class="v22Btn" id="v22Cancel">ABBRECHEN</button></div>');
+ el.querySelector('#v22Confirm').onclick=()=>{
+   if(!c.order)v22Order(c);
+   c.state='payment';v22Close('v22OrderBox');v22OpenPayment(c);ui();
+ };
+ el.querySelector('#v22Cancel').onclick=()=>v22Close('v22OrderBox');
+}
+function v22OpenPayment(c){
+ const due=c.order.price;
+ const options=[10,20,50].filter((v,i,a)=>a.indexOf(v)===i);
+ const given=options.find(v=>v>=due)||50;
+ c.cashGiven=given;c.changeGiven=0;
+ const el=v22Box('v22CashBox',
+ '<h2>💶 Kasse</h2><p><b>Zu zahlen: €'+fmt(due)+'</b></p><p>Der Kunde gibt: <b>€'+fmt(given)+'</b></p><p>Jetzt nur das <b>Rückgeld</b> mit den Scheinen/Münzen unten geben.</p><div class="v22Change" id="v22Return">Rückgeld: €0,00 / richtig: €'+fmt(given-due)+'</div><div class="v22Buttons v22Bills"><button class="v22Bill" data-r="1">€1</button><button class="v22Bill" data-r="5">€5</button><button class="v22Bill" data-r="10">€10</button><button class="v22Bill" data-r="20">€20</button></div><div class="v22Buttons"><button class="v22Btn primary" id="v22Pay">ZAHLUNG ABSCHLIESSEN</button><button class="v22Btn" id="v22Clear">ZURÜCKSETZEN</button></div>');
+ el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{
+   c.changeGiven=Math.round((c.changeGiven+Number(b.dataset.r))*100)/100;
+   setText('v22Return','Rückgeld: €'+fmt(c.changeGiven)+' / richtig: €'+fmt(given-due));
+ });
+ el.querySelector('#v22Clear').onclick=()=>{c.changeGiven=0;setText('v22Return','Rückgeld: €0,00 / richtig: €'+fmt(given-due))};
+ el.querySelector('#v22Pay').onclick=()=>v22Pay(c);
+}
+function v22Pay(c){
+ const due=c.order.price,given=c.cashGiven,correct=Math.round((given-due)*100)/100,returned=Math.round((c.changeGiven||0)*100)/100;
+ if(returned+0.001<correct)return toast('❌ Noch nicht genug Rückgeld gegeben.');
+ const extra=Math.max(0,returned-correct);
+ if(extra>0)hero.money=Math.max(0,hero.money-extra);
+ const table=v22FreeTable();
+ if(!table)return toast('❌ Kein sauberer Tisch frei.');
+ c.paid=true;c.change=returned;c.requiredChange=correct;c.extraChange=extra;c.tableId=table.id;
+ table.occupied=true;table.customerId=c.id;c.state='walking';c.tx=table.seat.x;c.ty=table.seat.y;c.nextState='waitingFood';
+ v22Close('v22CashBox');
+ hero.money+=due;hero.revenueToday+=due;hero.shiftRevenue+=due;hero.sales++;hero.xp+=10;
+ toast(extra>0?'⚠️ Zu viel Rückgeld: -€'+fmt(extra):'✅ Bezahlt • Rückgeld €'+fmt(returned));
+ ui();
+}function v22Near(){
+ let best=null,bd=75;
+ for(const c of v22.customers){
+   if(c.state!=='cashier'&&c.state!=='waitingFood')continue;
+   const d=Math.hypot(hero.x-c.x,hero.y-c.y);
+   if(d<bd){best=c;bd=d}
+ }
+ return best;
+}
+function v22Update(dt){
+ if(mode!=='game')return;
+ v22.spawnTimer-=dt;if(v22.spawnTimer<=0){v22Spawn();v22.spawnTimer=5+Math.random()*3}
+ for(const c of v22.customers){
+  if(c.state==='walking'){
+   const dx=c.tx-c.x,dy=c.ty-c.y,d=Math.hypot(dx,dy);
+   if(d<4){c.x=c.tx;c.y=c.ty;c.state=c.nextState}
+   else{c.x+=dx/d*95*dt;c.y+=dy/d*95*dt}
+  }else if(c.state==='eating'&&performance.now()/1000>=c.eatUntil){
+   const t=v22.tables.find(t=>t.id===c.tableId);if(t){t.occupied=false;t.customerId=null;t.dirty=true}
+   c.state='walking';c.tx=v22.door.x;c.ty=v22.door.y;c.nextState='leaving'
+  }else if(c.state==='leaving'&&Math.hypot(c.x-v22.door.x,c.y-v22.door.y)<10)c.remove=true;
+ }
+ v22.customers=v22.customers.filter(c=>!c.remove);
+}
+function v22Complete(){
+ if(order&&order.stepIndex>=order.steps.length&&!v22.heldFood){
+  v22.heldFood={name:order.name,qty:order.qty,customerId:order.customerId};
+  order.ready=true;toast('🍔 Burger fertig — zur Theke bringen');
+ }
+}
+function v22Prep(){
+ if(!order)return;const step=order.steps[order.stepIndex];
+ if(step==='bun'&&hero.bun>0){hero.bun--;v22Done('🍞 Brötchen fertig')}
+ else if(step==='grill'&&hero.patty>0){hero.patty--;v22Done('🔥 Patty fertig')}
+ else if(step==='cheese'&&hero.cheese>0){hero.cheese--;v22Done('🧀 Käse fertig')}
+ else if(step==='assembly'&&hero.packaging>0){hero.packaging--;v22Done('🍔 Burger gebaut')}
+ else toast('📦 Zutat fehlt');
+}
+function v22Done(msg){
+ order.stepIndex++;prep={step:-1,readyAt:0,overAt:0,started:false,duration:2.3};
+ addFloat(msg,hero.x,hero.y-45);burst(hero.x,hero.y,9);hero.xp+=10;levelCheck();v22Complete();ui();
+}
+function v22Tray(){
+ if(!v22.heldFood||!order)return false;
+ if(Math.hypot(hero.x-interactionPad.cash.x,hero.y-interactionPad.cash.y)>105)return false;
+ v22.tray={type:'food',customerId:order.customerId,qty:order.qty,name:order.name};v22.heldFood=null;
+ toast('🍱 Essen auf Tablett gelegt');ui();return true;
+}
+function v22Serve(c){
+ if(!v22.tray||v22.tray.type!=='food'||v22.tray.customerId!==c.id)return false;
+ v22.tray=null;c.state='eating';c.eatUntil=performance.now()/1000+10;
+ toast('🍔 Serviert — Kunde isst 10 Sekunden');hero.xp+=20;ui();return true;
+}
+function v22Clear(){
+ if(v22.tray)return false;
+ const t=v22.tables.find(t=>t.dirty&&Math.hypot(hero.x-t.x,hero.y-t.y)<85);
+ if(!t)return false;
+ v22.tray={type:'empty',tableId:t.id};toast('🧺 Leeres Tablett aufgenommen');return true;
+}
+function v22Trash(){
+ if(!v22.tray||v22.tray.type!=='empty'||Math.hypot(hero.x-v22.trash.x,hero.y-v22.trash.y)>85)return false;
+ const t=v22.tables.find(t=>t.id===v22.tray.tableId);if(t)t.dirty=false;
+ v22.tray=null;toast('🗑️ Müll entsorgt — Tisch ist wieder sauber');ui();return true;
+}
+function v22Interact(){
+ if(mode!=='game'||document.querySelector('.modal:not(.hidden)'))return;
+ if($('v22OrderBox')&&!$('v22OrderBox').classList.contains('hidden'))return;
+ if($('v22CashBox')&&!$('v22CashBox').classList.contains('hidden'))return;
+ const c=v22Near();
+ if(c){
+  if(c.state==='cashier'){v22Order(c);v22OpenOrder(c);return}
+  if(c.state==='waitingFood'&&v22Serve(c))return;
+ }
+ if(v22Trash()||v22Clear()||v22Tray())return;
+ const near=getNearestStation();if(!near)return toast('📍 Geht näher an eine Station.');
+ if(!order)return toast('🧑 Warte auf einen Kunden.');
+ const step=order.steps[order.stepIndex];if(step!==near)return toast('🔔 Erst '+step+' machen.');
+ if(near==='grill'){
+  const now=performance.now()/1000;
+  if(!prep.started){prep.started=true;prep.step=order.stepIndex;prep.duration=2.3;prep.readyAt=now+prep.duration;prep.overAt=prep.readyAt+1.5;toast('🔥 GRILL LÄUFT…')}
+  else if(now>=prep.overAt){prep={step:-1,readyAt:0,overAt:0,started:false,duration:2.3};toast('⚠️ ZU LANG GEBRATEN')}
+  else if(now>=prep.readyAt)v22Prep();else toast('⏳ Noch nicht fertig…');
+ }else v22Prep();
+}
+function v22Move(dt){
+ let x=(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0);
+ let y=(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0);
+ if(joy.on){x=joy.x;y=joy.y}const l=Math.hypot(x,y)||1;
+ if(x||y){const nx=hero.x+x/l*hero.speed*dt,ny=hero.y+y/l*hero.speed*dt;if(!v22Block(nx,hero.y))hero.x=nx;if(!v22Block(hero.x,ny))hero.y=ny}
+ hero.x=Math.max(285,Math.min(1235,hero.x));hero.y=Math.max(120,Math.min(805,hero.y));
+}
+function v22Block(x,y){
+ for(const p of Object.values(station))if(circleHitsRect(x,y,22,{x:p.x-56,y:p.y-43,w:112,h:86}))return true;
+ if(circleHitsRect(x,y,22,{x:390,y:410,w:350,h:88}))return true;
+ for(const t of v22.tables)if(circleHitsRect(x,y,22,{x:t.x-60,y:t.y-38,w:120,h:76}))return true;
+ return false;
+}
+function v22Cabinets(){
+ shadow(360,615,100,13,.3);
+ [300,360,420].forEach((x,i)=>{ctx.fillStyle='#b8c5c0';rr(x-27,230,54,350,10);ctx.fillStyle='#dce5e1';rr(x-22,240,44,158,7);ctx.fillStyle='#aebcb6';rr(x-22,410,44,158,7);ctx.strokeStyle='#687770';ctx.strokeRect(x-18,250,36,138);ctx.strokeRect(x-18,420,36,138);txt('SCHRANK '+(i+1),x,603,8,'#e1e9e5')});
+}
+function v22Tables(){
+ for(const t of v22.tables){
+  shadow(t.x,t.y+45,75,13,.32);ctx.fillStyle='#4b3427';rr(t.x-62,t.y-40,124,80,16);ctx.fillStyle='#a9784e';rr(t.x-55,t.y-33,110,66,13);
+  [{x:t.x-82,y:t.y},{x:t.x+82,y:t.y}].forEach(ch=>{ctx.fillStyle='#d5a45d';rr(ch.x-18,ch.y-15,36,30,8);ctx.fillStyle='#6d4c35';rr(ch.x-13,ch.y-11,26,22,6)});
+  txt(t.dirty?'🧺':t.occupied?'BESETZT':'FREI',t.x,t.y+4,10,t.dirty?'#ffe08b':t.occupied?'#a8e6ff':'#a8f0bc');
+ }
+}
+function v22TrashDraw(){
+ const x=v22.trash.x,y=v22.trash.y;shadow(x,y+48,45,10,.3);ctx.fillStyle='#1b2420';rr(x-42,y-38,84,78,10);ctx.fillStyle='#4e6258';rr(x-34,y-29,68,60,8);ctx.fillStyle='#26322d';rr(x-39,y-42,78,13,6);txt('🗑️',x,y+7,28,'#fff');txt('TABLETT / MÜLL',x,y+58,9,'#e7eee9');
+}
+function v22DoorDraw(){const x=v22.door.x,y=v22.door.y;ctx.fillStyle='#151d19';rr(x-58,y-55,116,65,12);ctx.fillStyle='#5b3c29';rr(x-49,y-47,98,57,9);txt('EINGANG',x,y-60,10,'#ffe1a0')}
+function v22CustomerDraw(c,t){
+ shadow(c.x,c.y+23,20,7,.38);ctx.fillStyle=c.color;ctx.beginPath();ctx.arc(c.x,c.y,21,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f1c5a0';ctx.beginPath();ctx.arc(c.x,c.y-5,13,0,Math.PI*2);ctx.fill();txt(c.state==='cashier'?'E / ✋ BESTELLEN':c.state==='waitingFood'?'WARTET AUF ESSEN':c.state==='eating'?'😋':'',c.x,c.y-42,10,'#ffe08b');
+}
+function v22World(t){
+ ctx.clearRect(0,0,W,H);if(mode!=='game'){ctx.fillStyle='#080a09';ctx.fillRect(0,0,W,H);return}
+ ctx.save();ctx.translate(W/2-hero.x,H/2-hero.y);ctx.fillStyle='#0b100e';ctx.fillRect(0,0,1500,900);
+ for(let y=0;y<900;y+=70)for(let x=0;x<1500;x+=70){ctx.fillStyle=((x+y)/70)%2?'#27312d':'#202a25';ctx.fillRect(x,y,68,68)}
+ ctx.fillStyle='#070b09';rr(235,55,1040,790,38);ctx.fillStyle='#6a4a33';rr(278,98,954,704,25);
+ txt('KÜCHE',750,112,12,'#c7d7d0');txt('KUNDENBEREICH',750,550,13,'#ffe3a0');
+ v22Cabinets();drawCounter();drawStations(t);drawInteractionPads(t);v22Tables();v22TrashDraw();v22DoorDraw();
+ for(const c2 of v22.customers)v22CustomerDraw(c2,t);
+ if(v22.heldFood)txt('🍔 '+v22.heldFood.qty+'×',hero.x,hero.y-48,13,'#ffe08b');else if(v22.tray)txt(v22.tray.type==='empty'?'🧺':'🍱',hero.x,hero.y-48,22,'#fff');
+ for(const p of others.values())drawCharacter(p,'#63c8ff',p.name||'CO-OP',t);drawCharacter(hero,'#f5b33f','YOU',t);ctx.restore();
+ const g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.15,W/2,H/2,Math.max(W,H)*.72);g.addColorStop(0,'transparent');g.addColorStop(1,'#0009');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+}
+const _v22Reset=resetLocalGameState;resetLocalGameState=function(){_v22Reset();v22.customers=[];v22.tray=null;v22.heldFood=null;v22.nextId=1;v22.spawnTimer=1.2};
+const _v22Save=makeSaveSnapshot;makeSaveSnapshot=function(slot){const z=_v22Save(slot);z.version=22;z.v22={customers:cloneData(v22.customers),tables:cloneData(v22.tables),tray:cloneData(v22.tray),heldFood:cloneData(v22.heldFood),nextId:v22.nextId,spawnTimer:v22.spawnTimer};return z};
+const _v22Apply=applySaveSnapshot;applySaveSnapshot=function(save){const ok=_v22Apply(save);if(save?.v22){v22.customers=Array.isArray(save.v22.customers)?cloneData(save.v22.customers):[];v22.tables=Array.isArray(save.v22.tables)?cloneData(save.v22.tables):v22.tables;v22.tray=save.v22.tray?cloneData(save.v22.tray):null;v22.heldFood=save.v22.heldFood?cloneData(save.v22.heldFood):null;v22.nextId=Number(save.v22.nextId)||1;v22.spawnTimer=Number(save.v22.spawnTimer)||4}return ok};
+makeOrder=function(){order=null;prep={step:-1,readyAt:0,overAt:0,started:false,duration:2.3};ui()};
+finishStep=v22Prep;prepDone=v22Done;tryInteract=v22Interact;move=v22Move;drawWorld=v22World;
+const _v22Start=startGame;startGame=function(showStory=true){_v22Start(showStory);if(!v22.customers.length)v22Spawn()};
+const _v22Loop=loop;loop=function(t){v22Update(Math.min(.04,(t-last)/1000));_v22Loop(t)};
+document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='e'){}});
+v22Style();
+
+
 </script>
-<script>
-(async()=>{try{
-  const parts=await Promise.all([
-    fetch('https://worlds-unbound-coop.onrender.com/v22.0.gzpart',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('v22.0 HTTP '+r.status);return r.arrayBuffer()}),
-    fetch('https://worlds-unbound-coop.onrender.com/v22.1.gzpart',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('v22.1 HTTP '+r.status);return r.arrayBuffer()})
-  ]);
-  const all=new Uint8Array(parts[0].byteLength+parts[1].byteLength);
-  all.set(new Uint8Array(parts[0]),0);
-  all.set(new Uint8Array(parts[1]),parts[0].byteLength);
-  const stream=new Blob([all]).stream().pipeThrough(new DecompressionStream('gzip'));
-  const code=await new Response(stream).text();
-  (0,eval)(code);
-}catch(err){console.error('Burger Simulator V2.2 Loader',err)}})();
-</script>
-<script src="v22-loader.js"></script>
 </body>
 </html>
 """#
