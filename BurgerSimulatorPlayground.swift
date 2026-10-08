@@ -4,11 +4,9 @@ import WebKit
 
 struct BurgerSimulatorWebView: UIViewRepresentable {
     let html: String
-
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
-
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.isOpaque = false
         webView.backgroundColor = .black
@@ -17,11 +15,9 @@ struct BurgerSimulatorWebView: UIViewRepresentable {
         webView.scrollView.isScrollEnabled = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsBackForwardNavigationGestures = false
-
         webView.loadHTMLString(html, baseURL: URL(string: "https://worlds-unbound-coop.onrender.com/")!)
         return webView
     }
-
     func updateUIView(_ webView: WKWebView, context: Context) {}
 }
 
@@ -1573,6 +1569,7 @@ function v22Pay(c){
 }function v22Near(){
  let best=null,bd=75;
  for(const c of v22.customers){
+   if(c.state==='cashier' && order && order.customerId!==c.id)continue;
    if(c.state!=='cashier'&&c.state!=='waitingFood')continue;
    const d=Math.hypot(hero.x-c.x,hero.y-c.y);
    if(d<bd){best=c;bd=d}
@@ -1621,6 +1618,7 @@ function v22Tray(){
 function v22Serve(c){
  if(!v22.tray||v22.tray.type!=='food'||v22.tray.customerId!==c.id)return false;
  v22.tray=null;c.state='eating';c.eatUntil=performance.now()/1000+10;
+ order=null;prep={step:-1,readyAt:0,overAt:0,started:false,duration:2.3};
  toast('🍔 Serviert — Kunde isst 10 Sekunden');hero.xp+=20;ui();return true;
 }
 function v22Clear(){
